@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=pi
-WorkingDirectory=/home/pi/noderedstuff/esp32_gestor/backend
+WorkingDirectory=/home/pi/noderedstuff/ESP32_Gestor/backend
 ExecStart=/usr/bin/node index.js
 Restart=on-failure
 Type=simple
