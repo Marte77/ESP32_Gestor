@@ -37109,7 +37109,7 @@ A.JI(B.Ay,new A.a9R(s))},
 uf(){var s=0,r=A.a9(t.z),q=this,p,o,n,m,l,k,j,i,h,g
 var $async$uf=A.aa(function(a,b){if(a===1)return A.a6(b,r)
 while(true)switch(s){case 0:s=2
-return A.ai(A.ana(A.alN("http","localhost:8080","getall",null)),$async$uf)
+return A.ai(A.ana(A.alN("http","192.168.3.0:8080","getall",null)),$async$uf)
 case 2:g=b
 if(g.b===200){p=J.aM(B.bh.JL(0,A.aAe(A.ayt(g.e).c.a.h(0,"charset")).dH(0,g.w),null),"dados")
 o=q.d

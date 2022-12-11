@@ -63,12 +63,13 @@ typedef enum{
 uint8_t wait = 50;
 modo modoLED = EfadeEstatico;
 COR cor = BRANCO;
+bool isTurnedOff = false;
 
 IPAddress ip;
 bool isWifiConnected = false;
 WiFiServer server(80);
 String header;
-String linkRegistarServidor = "http://192.168.2.103:8080";
+String linkRegistarServidor = "http://192.168.3.0:8080";
 
 //TaskHandle_t TaskWifi;
 TaskHandle_t TaskLED;
@@ -232,6 +233,7 @@ inline void selectMode(){
       arcoIrisCycle();
       break;
     case EturnOff:
+      desligarLeds();
       break;
   }
 }
@@ -254,10 +256,20 @@ inline bool compararModos(String modo){
   }
   else if(modo == "arcoiriscycle"){
     modoLED = EarcoIrisCycle;
-  }else{
+  }else if(modo == "turnoff"){
+    modoLED = EturnOff;
+  }
+  else{
     isCorrect = false;
   }
   return isCorrect;
+}
+void desligarLeds(){
+  if(!isTurnedOff){
+    for(int i = 0; i<LED_NUMBER; i++){
+      strip.setPixelColor(i,corToUInt(PRETO));
+    }
+  }
 }
 void fadeEstatico(){
   for(int i = 0; i<=255; i++){

@@ -80,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void initAsync() async {
-    var url = Uri.http('localhost:8080', 'getall');
+    var url = Uri.http('192.168.3.0:8080', 'getall');
     var res = await http.get(url);
     if (res.statusCode == 200) {
       List<dynamic> parsed = jsonDecode(res.body)['dados'];
