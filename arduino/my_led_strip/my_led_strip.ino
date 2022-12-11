@@ -5,14 +5,16 @@
 #define PIN 23
 #define PIN_VCC 18
 #define PIN_GND 21
-#define LED_NUMBER 40
+#define NUMBER_OF_LEDS 40
 #define MAX_BRIGHTNESS 255
 #define MEU_ROSA createCor(252,2,149)
 #define BRANCO createCor(0,0,0,255)
 #define BRANCO_RGB createCor(255,255,255)
 #define PRETO createCor(0,0,0,0)
+#define AZUL_CEU createCor(2,0,244)
+#define AMARELO_ESTRELAS createCor(255,251,0)
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_NUMBER, PIN, NEO_GRBW + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMBER_OF_LEDS, PIN, NEO_GRBW + NEO_KHZ800);
 
 typedef struct {
   uint8_t r;
@@ -57,11 +59,12 @@ typedef enum{
   EpreencherUmAUmBounce,
   EarcoIris,
   EarcoIrisCycle,
-  EturnOff
+  EturnOff,
+  EcintilarEstrelas
 }modo;
 
 uint8_t wait = 50;
-modo modoLED = EturnOff;
+modo modoLED = EcorEstatica;
 COR cor = BRANCO;
 
 IPAddress ip;
@@ -90,6 +93,7 @@ inline void setupWifi(){
   Serial.println(ip);
 }
 inline void registarIPNoServidor(){
+  Serial.println("vou registar");
   String path = linkRegistarServidor + "/registar?ip=" + ip.toString();
   HTTPClient clientHTTP;
   clientHTTP.begin(path.c_str());
@@ -97,7 +101,6 @@ inline void registarIPNoServidor(){
   int responseCode = clientHTTP.PUT(ip.toString());
   if(responseCode>0){
     String response = clientHTTP.getString();
-    Serial.println(response);    
   }
   clientHTTP.end();
 }
@@ -106,7 +109,7 @@ void setup() {
   strip.begin();
   strip.setBrightness(255);
   // Initialize all pixels to 'off'
-  for(int i =0;i<strip.numPixels();i++){
+  for(int i =0;i<NUMBER_OF_LEDS;i++){
     strip.setPixelColor(i,corToUInt(BRANCO));
   }
   strip.show();
@@ -129,11 +132,11 @@ inline void createLEDThread(){
   xTaskCreatePinnedToCore(
     loopLED, //funcao a executar na task
     "led controller", //nome da task
-    1000, //tamanho do stack para a task
+    8000, //tamanho do stack para a task
     NULL, //argumentos da task
     1, //prioridade da task
     &TaskLED,
-    1 //meter a task no core 0
+    1 //meter a task no core 1
   );
 }
 long int currentTime = millis();
@@ -162,7 +165,6 @@ inline void parseRequest(WiFiClient client){
     if (client.available()){
       char c = client.read();
       if (c == '\n' && currentLineIsBlank){
-        Serial.println(currentLine);
         currentLine.replace("%3F","?");
         String requestPath = currentLine.substring(3,currentLine.indexOf("HTTP/1.1"));
         if(requestPath.indexOf("/mode/")>=0 && requestPath.indexOf("?") >=0){
@@ -172,7 +174,7 @@ inline void parseRequest(WiFiClient client){
           int g = requestPath.substring(requestPath.indexOf("g=")+2,requestPath.indexOf("b=")).toInt();
           int b = requestPath.substring(requestPath.indexOf("b=")+2,requestPath.indexOf("w=")).toInt();
           int w = requestPath.substring(requestPath.indexOf("w=")+2,requestPath.indexOf("br=")).toInt();
-          int br = requestPath.substring(requestPath.indexOf("br=")+2).toInt();
+          int br = requestPath.substring(requestPath.indexOf("br=")+3).toInt();
           currentLine = "Mode: " + mode + "\nCores: (" + r + "," + g + "," + b + "," + w + ") with brightness= " + br;
           cor = w == 0 ? createCor(r,g,b) : createCor(r,g,b,w);
           if(br > 0){
@@ -185,6 +187,16 @@ inline void parseRequest(WiFiClient client){
             response = "HTTP/1.1 404 Not Found";
             currentLine+="\nNAO E VALIDO";
           }
+        }else if(requestPath.indexOf("/wait/")>=0){
+          String aux = requestPath.substring(requestPath.indexOf("/wait/")+6);
+          aux = aux.substring(0,aux.indexOf(" "));
+          int waitNovo = aux.toInt();
+          if(waitNovo <= 0){
+            waitNovo = 1;
+          }
+          wait = waitNovo;          
+          response = "HTTP/1.1 200 OK";
+          currentLine = "Wait atualizado";
         }else{
           response = "HTTP/1.1 404 Not Found";
           currentLine ="\ncaminho nao existe";
@@ -226,6 +238,9 @@ inline void selectMode(){
     case EpreencherUmAUm:
       preencherUmAUm();
       break;
+    case EpreencherUmAUmBounce:
+      preencherUmAUmBounce();
+      break;
     case EarcoIris:
       arcoIris();
       break;
@@ -234,6 +249,9 @@ inline void selectMode(){
       break;
     case EturnOff:
       desligarLeds();
+      break;
+    case EcintilarEstrelas:
+      cintilarEstrelas();
       break;
   }
 }
@@ -258,21 +276,40 @@ inline bool compararModos(String modo){
     modoLED = EarcoIrisCycle;
   }else if(modo == "turnoff"){
     modoLED = EturnOff;
+  }else if(modo == "cintilarestrelas"){
+    modoLED = EcintilarEstrelas;
   }
   else{
     isCorrect = false;
   }
   return isCorrect;
 }
-inline void desligarLeds(){
-  for(int i = 0; i<strip.numPixels(); i++){
-      strip.setPixelColor(i,corToUInt(PRETO));
+
+void cintilarEstrelas(){
+  strip.show();
+  for (int i = 0; i<NUMBER_OF_LEDS; i++) {
+    strip.setPixelColor(i, corToUInt(AZUL_CEU));
   }
+  int array[10];
+  for(int i = 0; i<10; i++){
+    array[i] = random(NUMBER_OF_LEDS);
+    strip.setPixelColor(array[i],corToUInt(AMARELO_ESTRELAS));
+    strip.show();
+    delay(wait*3);    
+  }
+  for(int i = 0; i<10; i++){
+    strip.setPixelColor(array[i],corToUInt(AZUL_CEU));
+    strip.show();
+    delay(wait*3);    
+  }
+  delay(wait*15);
+}
+inline void desligarLeds(){
   strip.show();
 }
 void fadeEstatico(){
   for(int i = 0; i<=255; i++){
-    for(int j = 0; j<strip.numPixels(); j++){
+    for(int j = 0; j<NUMBER_OF_LEDS; j++){
       strip.setPixelColor(j,corToUInt(corWithBrightness(cor,i)));
     }
     strip.show();
@@ -280,7 +317,7 @@ void fadeEstatico(){
   }
   delay(wait*2);
   for(int i = 255; i>=0; i--){
-    for(int j = 0; j<strip.numPixels(); j++){
+    for(int j = 0; j<NUMBER_OF_LEDS; j++){
       strip.setPixelColor(j,corToUInt(corWithBrightness(cor,i)));
     }
     strip.show();
@@ -289,19 +326,19 @@ void fadeEstatico(){
   delay(wait*2);
 }
 inline void corEstatica(){
-  for(int i = 0; i<strip.numPixels(); i++){
+  for(int i = 0; i<NUMBER_OF_LEDS; i++){
     strip.setPixelColor(i,corToUInt(cor));
   }
   strip.show();
 }
 void preencherUmAUm(){
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
+  for(uint16_t i=0; i<NUMBER_OF_LEDS; i++) {
     strip.setPixelColor(i, corToUInt(cor));
     strip.show();
     delay(wait);
   }
   delay(wait/20);
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
+  for(uint16_t i=0; i<NUMBER_OF_LEDS; i++) {
     strip.setPixelColor(i, corToUInt(PRETO));
     strip.show();
     delay(wait/2);
@@ -309,32 +346,58 @@ void preencherUmAUm(){
   delay(wait/20);
 }
 void preencherUmAUmBounce(){
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
+  int EyeSize = 5;
+  for(int i = 0; i < NUMBER_OF_LEDS-EyeSize-2; i++) {
+    strip.show();
+    strip.setPixelColor(i, corToUInt(corWithBrightness(cor,25)));
+    for(int j = 1; j <= EyeSize; j++) {
+      strip.setPixelColor(i+j, corToUInt(cor)); 
+    }
+    strip.setPixelColor(i+EyeSize+1, corToUInt(corWithBrightness(cor,25)));
+    strip.show();
+    delay(wait);
+  }
+
+  delay(wait);
+
+  for(int i = NUMBER_OF_LEDS-EyeSize-2; i > 0; i--) {
+    strip.show();
+    strip.setPixelColor(i, corToUInt(corWithBrightness(cor,25)));
+    for(int j = 1; j <= EyeSize; j++) {
+      strip.setPixelColor(i+j, corToUInt(cor)); 
+    }
+    strip.setPixelColor(i+EyeSize+1, corToUInt(corWithBrightness(cor,25)));
+    strip.show();
+    delay(wait);
+  }
+  
+  delay(wait);
+  /*for(uint16_t i=0; i<NUMBER_OF_LEDS; i++) {
     strip.setPixelColor(i, corToUInt(cor));
     strip.show();
     delay(wait);
   }
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
+  for(uint16_t i=0; i<NUMBER_OF_LEDS; i++) {
     strip.setPixelColor(i, corToUInt(PRETO));
     strip.show();
-    delay(wait);
+    delay(wait/5);
   }
   //delay(wait/20);
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(strip.numPixels()-i, corToUInt(cor));
+  for(uint16_t i=0; i<NUMBER_OF_LEDS; i++) {
+    strip.setPixelColor(NUMBER_OF_LEDS-i, corToUInt(cor));
     strip.show();
     delay(wait);
   }
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(strip.numPixels()-i, corToUInt(PRETO));
+  for(uint16_t i=0; i<NUMBER_OF_LEDS; i++) {
+    strip.setPixelColor(NUMBER_OF_LEDS-i, corToUInt(PRETO));
     strip.show();
-    delay(wait);
+    delay(wait/5);
   }
-  //delay(wait/20);
+  delay(wait/20);*/
 }
 void arcoIris(){
   for(uint16_t j=0; j<256; j++) {
-    for(uint16_t i=0; i<strip.numPixels(); i++) {
+    for(uint16_t i=0; i<NUMBER_OF_LEDS; i++) {
       strip.setPixelColor(i, Wheel((i+j) & 255));
     }
     strip.show();
@@ -343,8 +406,8 @@ void arcoIris(){
 }
 void arcoIrisCycle() {
   for(uint16_t j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(uint16_t i=0; i< strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+    for(uint16_t i=0; i< NUMBER_OF_LEDS; i++) {
+      strip.setPixelColor(i, Wheel(((i * 256 / NUMBER_OF_LEDS) + j) & 255));
     }
     strip.show();
     delay(wait);

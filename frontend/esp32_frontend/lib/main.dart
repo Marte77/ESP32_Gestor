@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:material_color_generator/material_color_generator.dart';
 
+StreamController<MaterialColor> colorTheme = StreamController();
 void main() {
   runApp(const MyApp());
 }
@@ -15,13 +17,17 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.pink,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return StreamBuilder<MaterialColor>(
+      initialData: Colors.pink,
+      stream: colorTheme.stream,
+      builder: ((context, snapshot) {
+        return MaterialApp(
+          title: 'Mudar Leds',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(primarySwatch: snapshot.data ?? Colors.pink),
+          home: const MyHomePage(title: 'Flutter Demo Home Page'),
+        );
+      }),
     );
   }
 }
@@ -57,12 +63,15 @@ class _MyHomePageState extends State<MyHomePage> {
     'preencherUmAUmBounce',
     'arcoIris',
     'arcoIrisCycle',
+    'cintilarEstrelas',
     'turnOff',
   ];
   final formGlobalKey = GlobalKey<FormState>();
   String selectedMetodo = 'fadeEstatico';
-  Color? selectedColor = const Color.fromARGB(255, 252, 2, 149);
+  Color? selectedColor = Colors.pink;
   int brightnessVal = 255;
+  int waitTime = 50;
+  bool isWaitButtonEnabled = true;
   Timer? timer;
   bool isFullWhite = false;
   @override
@@ -121,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               MaterialBanner(
                 content: const Text(
-                    "O valor Alpha na selecao de cores, define a cor Branca dos leds.\nCertos modos ignoram a cor selecionada"),
+                    "O valor Alpha na selecao de cores, define a cor Branca dos leds.\nCertos modos ignoram a cor e brilho selecionados"),
                 leading: const CircleAvatar(child: Icon(Icons.warning)),
                 actions: [
                   TextButton(
@@ -133,6 +142,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () {},
                   ),
                 ],
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 15),
+                child: Divider(),
               ),
               Form(
                 key: formGlobalKey,
@@ -147,6 +160,50 @@ class _MyHomePageState extends State<MyHomePage> {
                             });
                           })
                       : const Text(''),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          initialValue: waitTime.toString(),
+                          onChanged: (value) {
+                            var aux = int.tryParse(value);
+                            if (aux != null && aux > 0) {
+                              setState(() {
+                                waitTime = aux;
+                                isWaitButtonEnabled = true;
+                              });
+                            } else {
+                              setState(() {
+                                isWaitButtonEnabled = false;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      OutlinedButton(
+                          onPressed: isWaitButtonEnabled
+                              ? () {
+                                  var url = Uri.http(
+                                      selected!.ipaddress, "wait/$waitTime");
+                                  http
+                                      .get(url)
+                                      .then((value) => null)
+                                      .onError((error, stackTrace) {
+                                    return null;
+                                  });
+                                }
+                              : null,
+                          child: const Text('Definir tempo de espera'))
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    child: Divider(),
+                  ),
                   DropdownButton(
                     value: selectedMetodo,
                     items: List.generate(
@@ -185,6 +242,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 onColorChanged: ((value) {
                                   setState(() {
                                     selectedColor = value;
+                                    colorTheme.add(
+                                        generateMaterialColor(color: value));
                                   });
                                 }),
                                 portraitOnly: true,
@@ -219,6 +278,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                     onChanged: (value) {
                       var aux = int.tryParse(value);
+
                       if (aux == null || aux > 255 || aux < 0) {
                         setState(() {
                           brightnessVal = 255;
@@ -229,6 +289,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         });
                       }
                     },
+                  ),
+                  const SizedBox(
+                    height: 10,
                   ),
                   ElevatedButton(
                     onPressed: (() async {
@@ -260,7 +323,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           .get(url)
                           .then((value) => null)
                           .onError((error, stackTrace) {
-                        print(error);
                         return null;
                       });
                     }),
