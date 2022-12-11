@@ -61,9 +61,8 @@ typedef enum{
 }modo;
 
 uint8_t wait = 50;
-modo modoLED = EfadeEstatico;
+modo modoLED = EturnOff;
 COR cor = BRANCO;
-bool isTurnedOff = false;
 
 IPAddress ip;
 bool isWifiConnected = false;
@@ -145,6 +144,7 @@ void loop(){
   }
   if(millis() - currentTime > 30000){
     registarIPNoServidor();
+    currentTime = millis();
   }
 }
 
@@ -264,28 +264,32 @@ inline bool compararModos(String modo){
   }
   return isCorrect;
 }
-void desligarLeds(){
-  if(!isTurnedOff){
-    for(int i = 0; i<LED_NUMBER; i++){
+inline void desligarLeds(){
+  for(int i = 0; i<strip.numPixels(); i++){
       strip.setPixelColor(i,corToUInt(PRETO));
-    }
   }
+  strip.show();
 }
 void fadeEstatico(){
   for(int i = 0; i<=255; i++){
-    corEstatica();
-  
+    for(int j = 0; j<strip.numPixels(); j++){
+      strip.setPixelColor(j,corToUInt(corWithBrightness(cor,i)));
+    }
+    strip.show();
     delay(wait);
   }
   delay(wait*2);
   for(int i = 255; i>=0; i--){
-    corEstatica();
+    for(int j = 0; j<strip.numPixels(); j++){
+      strip.setPixelColor(j,corToUInt(corWithBrightness(cor,i)));
+    }
+    strip.show();
     delay(wait);
   }
   delay(wait*2);
 }
-void corEstatica(){
-  for(int i = 0; i<LED_NUMBER; i++){
+inline void corEstatica(){
+  for(int i = 0; i<strip.numPixels(); i++){
     strip.setPixelColor(i,corToUInt(cor));
   }
   strip.show();

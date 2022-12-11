@@ -64,11 +64,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Color? selectedColor = const Color.fromARGB(255, 252, 2, 149);
   int brightnessVal = 255;
   Timer? timer;
-
+  bool isFullWhite = false;
   @override
   void initState() {
     super.initState();
     emptyesp = esps.first.value;
+    initAsync();
     timer = Timer.periodic(const Duration(seconds: 15), ((timer) {
       initAsync();
     }));
@@ -162,6 +163,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       }
                     },
                   ),
+                  ListTile(
+                      title: const Text("Usar apenas branco"),
+                      leading: Switch(
+                        value: isFullWhite,
+                        onChanged: (value) => setState(() {
+                          isFullWhite = value;
+                        }),
+                      )),
                   ElevatedButton(
                     onPressed: () {
                       showDialog(
@@ -237,6 +246,13 @@ class _MyHomePageState extends State<MyHomePage> {
                             const SnackBar(
                                 content: Text("Sem as informacoes todas")));
                         return;
+                      }
+                      if (isFullWhite) {
+                        selectedColor = selectedColor!
+                            .withRed(0)
+                            .withBlue(0)
+                            .withGreen(0)
+                            .withAlpha(0); //alpha a 0 porque inverte
                       }
                       var url = Uri.http(selected!.ipaddress,
                           "mode/$selectedMetodo?r=${selectedColor!.red},g=${selectedColor!.green},b=${selectedColor!.blue},w=${map(selectedColor!.alpha.toDouble(), 0, 255, 255, 0)},br=$brightnessVal");
