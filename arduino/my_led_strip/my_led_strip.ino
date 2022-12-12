@@ -305,6 +305,7 @@ void cintilarEstrelas(){
   delay(wait*15);
 }
 inline void desligarLeds(){
+  strip.clear();
   strip.show();
 }
 void fadeEstatico(){
@@ -348,12 +349,12 @@ void preencherUmAUm(){
 void preencherUmAUmBounce(){
   int EyeSize = 5;
   for(int i = 0; i < NUMBER_OF_LEDS-EyeSize-2; i++) {
-    strip.show();
-    strip.setPixelColor(i, corToUInt(corWithBrightness(cor,25)));
+    strip.clear();
+    strip.setPixelColor(i, corToUInt(corWithBrightness(cor,5)));
     for(int j = 1; j <= EyeSize; j++) {
       strip.setPixelColor(i+j, corToUInt(cor)); 
     }
-    strip.setPixelColor(i+EyeSize+1, corToUInt(corWithBrightness(cor,25)));
+    strip.setPixelColor(i+EyeSize+1, corToUInt(corWithBrightness(cor,5)));
     strip.show();
     delay(wait);
   }
@@ -361,12 +362,12 @@ void preencherUmAUmBounce(){
   delay(wait);
 
   for(int i = NUMBER_OF_LEDS-EyeSize-2; i > 0; i--) {
-    strip.show();
-    strip.setPixelColor(i, corToUInt(corWithBrightness(cor,25)));
+    strip.clear();
+    strip.setPixelColor(i, corToUInt(corWithBrightness(cor,5)));
     for(int j = 1; j <= EyeSize; j++) {
       strip.setPixelColor(i+j, corToUInt(cor)); 
     }
-    strip.setPixelColor(i+EyeSize+1, corToUInt(corWithBrightness(cor,25)));
+    strip.setPixelColor(i+EyeSize+1, corToUInt(corWithBrightness(cor,5)));
     strip.show();
     delay(wait);
   }
