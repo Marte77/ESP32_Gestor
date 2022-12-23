@@ -7,11 +7,8 @@ import 'package:esp32_frontend/widgets/devices/components/escolher_cor.dart';
 import 'package:esp32_frontend/widgets/devices/components/ligar_desligar.dart';
 import 'package:esp32_frontend/widgets/devices/components/luminosidade.dart';
 import 'package:esp32_frontend/widgets/devices/components/power_on_behaviour.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
 
 import '../ziggbee_device.dart';
 
@@ -19,28 +16,19 @@ class TuyaTS0505B extends StatefulWidget {
   const TuyaTS0505B(
       {Key? key,
       required this.mqttClient,
-      required this.mqttBrowserClient,
       required this.state,
       required this.friendlyName})
-      : assert(mqttBrowserClient == null
-            ? mqttClient != null
-            : mqttClient == null),
-        assert(mqttClient == null
-            ? mqttBrowserClient != null
-            : mqttBrowserClient == null),
-        super(key: key);
+      : super(key: key);
   final String friendlyName;
   final Map<String, dynamic> state;
-  final MqttServerClient? mqttClient;
-  final MqttBrowserClient? mqttBrowserClient;
+  final MqttClient? mqttClient;
   @override
   State<TuyaTS0505B> createState() => _TuyaTS0505BState();
 }
 
 class _TuyaTS0505BState extends State<TuyaTS0505B>
     implements MQTTSubscriberInterface {
-  MqttServerClient? mqttClient;
-  MqttBrowserClient? mqttBrowserClient;
+  late MqttClient mqttClient;
   Map<String, dynamic> payloadData = {
     "brightness": 254,
     "color": {
@@ -86,27 +74,21 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
     powerOnBehaviour = payloadData["power_on_behavior"];
   }
 
-  MqttClient getClient() {
-    if (kIsWeb) return mqttBrowserClient!;
-    return mqttClient!;
-  }
-
   @override
   initState() {
     super.initState();
-    mqttBrowserClient = widget.mqttBrowserClient;
-    mqttClient = widget.mqttClient;
+    mqttClient = widget.mqttClient!;
     setState(() {
       topic = 'zigbee2mqtt/${widget.friendlyName}';
       payloadData = widget.state;
       setData();
     });
-    var sub = getClient().subscribe(topic, MqttQos.atMostOnce);
+    var sub = mqttClient.subscribe(topic, MqttQos.atMostOnce);
     if (sub == null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text("Erro a subscrever")));
     }
-    getClient().updates!.listen((event) {
+    mqttClient.updates!.listen((event) {
       for (var evento in event) {
         if (evento.topic == topic) {
           payloadData = jsonDecode(MqttPublishPayload.bytesToStringAsString(
@@ -264,7 +246,7 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<MqttReceivedMessage<MqttMessage>>>(
-      stream: getClient().updates!,
+      stream: mqttClient.updates!,
       builder: (context, snapshot) {
         //nao preciso de fazer nada pois no initState já tenho a funcao a fazer listen
         return Column(children: elementos(context));
@@ -274,7 +256,7 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
 
   @override
   void subscribeToTopic() {
-    getClient().subscribe(topic, MqttQos.atLeastOnce);
+    mqttClient.subscribe(topic, MqttQos.atLeastOnce);
   }
 
   @override
@@ -282,7 +264,7 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
     subscribeToTopic();
     var builder = MqttClientPayloadBuilder();
     builder.addString(jsonEncode(map));
-    getClient()
-        .publishMessage('$topic/set', MqttQos.atMostOnce, builder.payload!);
+    mqttClient.publishMessage(
+        '$topic/set', MqttQos.atMostOnce, builder.payload!);
   }
 }

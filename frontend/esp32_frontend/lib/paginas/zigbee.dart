@@ -1,12 +1,11 @@
 import 'dart:convert';
 
+import 'package:esp32_frontend/util/support_web_mobile/mqtt_finder.dart';
 import 'package:esp32_frontend/widgets/devices/ziggbee_device.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
 
 class PaginaZigbee extends StatefulWidget {
   const PaginaZigbee({Key? key}) : super(key: key);
@@ -16,9 +15,7 @@ class PaginaZigbee extends StatefulWidget {
 }
 
 class _PaginaZigbeeState extends State<PaginaZigbee> {
-  final mqttClient = kIsWeb
-      ? MqttBrowserClient.withPort('ws://192.168.3.0', 'boas', 8079)
-      : MqttServerClient.withPort('192.168.3.0', 'boas', 1883);
+  final mqttClient = MqttFinder().getClient();
   bool willRenderNormal = true;
   static const zigbee2mqttTopic = 'zigbee2mqtt/bridge/devices';
   List<Map<String, dynamic>> listaDevices = [];
@@ -106,12 +103,7 @@ class _PaginaZigbeeState extends State<PaginaZigbee> {
                           itemBuilder: (context, index) {
                             return ZigBeeDevice(
                               appBar: myAppBar,
-                              mqttClient: kIsWeb
-                                  ? null
-                                  : mqttClient as MqttServerClient,
-                              mqttBrowserClient: kIsWeb
-                                  ? mqttClient as MqttBrowserClient
-                                  : null,
+                              mqttClient: mqttClient,
                               device: listaDevices.elementAt(index),
                             );
                           }),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:esp32_frontend/paginas/esp32.dart';
 import 'package:esp32_frontend/paginas/zigbee.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
