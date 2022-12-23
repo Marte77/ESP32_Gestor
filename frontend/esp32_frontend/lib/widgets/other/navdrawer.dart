@@ -14,8 +14,7 @@ class NavDrawer extends StatelessWidget {
             child: const DrawerHeader(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                    image: NetworkImage(
-                        "https://cdn.discordapp.com/attachments/976075396149821511/976517163777150996/20220518_171020.jpg"),
+                    image: AssetImage('assets/images/burger.jpg'),
                     fit: BoxFit.fill),
               ),
               child: Text("Ola"),

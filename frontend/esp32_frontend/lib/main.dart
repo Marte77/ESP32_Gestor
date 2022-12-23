@@ -58,16 +58,21 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Inicio"),
-      ),
-      drawer: const NavDrawer(),
-      body: Column(children: const [
-        Card(
-          child: Text(
-              "todo fazer cards para mostrar as fitas e lampadas disponiveis"),
-        )
-      ]),
-    );
+        appBar: AppBar(
+          title: const Text("Inicio"),
+        ),
+        drawer: const NavDrawer(),
+        body: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage('assets/images/pizza.jpg'),
+                  fit: BoxFit.fill),
+            ),
+            child: Column(children: const [
+              Card(
+                child: Text(
+                    "todo fazer cards para mostrar as fitas e lampadas disponiveis"),
+              )
+            ])));
   }
 }
