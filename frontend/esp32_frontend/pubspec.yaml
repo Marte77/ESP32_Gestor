@@ -39,9 +39,7 @@ dependencies:
   material_color_generator: ^1.1.0
   mqtt_client: ^9.6.8
   logger: ^1.1.0
-  window_manager: ^0.2.7
   binary: ^3.0.1
-  flutter_color: ^2.0.0
 
 dev_dependencies:
   flutter_test:

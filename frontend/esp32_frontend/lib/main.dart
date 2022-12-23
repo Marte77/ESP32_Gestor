@@ -1,25 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:esp32_frontend/paginas/esp32.dart';
 import 'package:esp32_frontend/paginas/zigbee.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
 import 'package:flutter/material.dart';
-import 'package:window_manager/window_manager.dart';
 
 StreamController<MaterialColor> colorTheme = StreamController();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Must add this line.
-  await windowManager.ensureInitialized();
-
-  WindowOptions windowOptions = const WindowOptions(
-      size: Size(800, 600),
-      center: true,
-      skipTaskbar: false,
-      minimumSize: Size(200, 200));
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
   runApp(const MyApp());
 }
 

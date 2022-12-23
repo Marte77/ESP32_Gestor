@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:binary/binary.dart';
-import 'package:flutter_color/flutter_color.dart';
+import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
@@ -14,16 +14,24 @@ class ZigBeeDevice extends StatefulWidget {
       {Key? key,
       required this.appBar,
       required this.device,
-      required this.mqttClient})
-      : super(key: key);
+      required this.mqttClient,
+      required this.mqttBrowserClient})
+      : assert(mqttBrowserClient == null
+            ? mqttClient != null
+            : mqttClient == null),
+        assert(mqttClient == null
+            ? mqttBrowserClient != null
+            : mqttBrowserClient == null),
+        super(key: key);
   final AppBar appBar;
-  final MqttServerClient mqttClient;
+  final MqttServerClient? mqttClient;
+  final MqttBrowserClient? mqttBrowserClient;
   final Map<String, dynamic> device;
 
   // ignore: non_constant_identifier_names
   /// param Y normalmente é a brightness
   static Color convert_xyY_to_XYZ(double x, double y, double Y) {
-    if (y == 0) return XyzColor(0, 0, 0);
+    if (y == 0) return const Color.fromARGB(0, 0, 0, 0);
     //https://github.com/Shnoo/js-CIE-1931-rgb-color-converter/blob/master/ColorConverter.js#L211
     Y = Y / 255;
     double X = (Y / y) * x;
@@ -66,11 +74,16 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
       model = "",
       vendor = "",
       powerSource = "";
-
-  late MqttServerClient mqttClient;
+  MqttBrowserClient? mqttBrowserClient;
+  MqttServerClient? mqttClient;
   Map<String, dynamic> payloadData = {};
   Map<String, dynamic> dataReceivedOnSubscribe = {};
   bool canRender = false;
+
+  MqttClient getClient() {
+    if (kIsWeb) return mqttBrowserClient!;
+    return mqttClient!;
+  }
 
   @override
   void initState() {
@@ -83,15 +96,16 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
       model = widget.device["model"];
       vendor = widget.device["vendor"];
       powerSource = widget.device["power_source"];
+      mqttBrowserClient = widget.mqttBrowserClient;
       mqttClient = widget.mqttClient;
     });
     String topic = 'zigbee2mqtt/$friendlyName';
     var builder = MqttClientPayloadBuilder();
     builder.addString(jsonEncode({"state": ""}));
-    widget.mqttClient.subscribe(topic, MqttQos.atLeastOnce);
-    widget.mqttClient
+    getClient().subscribe(topic, MqttQos.atLeastOnce);
+    getClient()
         .publishMessage('$topic/get', MqttQos.atMostOnce, builder.payload!);
-    widget.mqttClient.updates!.listen((event) {
+    getClient().updates!.listen((event) {
       for (var evento in event) {
         if (evento.topic != topic) continue;
         var mensagem = (evento).payload as MqttPublishMessage;
@@ -101,7 +115,7 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
           canRender = true;
           dataReceivedOnSubscribe = jsonDecode(conteudo);
         });
-        widget.mqttClient.unsubscribe(topic);
+        getClient().unsubscribe(topic);
       }
     });
   }
@@ -113,7 +127,8 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
     if (model == "TS0505B") {
       //ligar e desligar
       lista = TuyaTS0505B(
-          mqttClient: mqttClient,
+          mqttClient: widget.mqttClient,
+          mqttBrowserClient: widget.mqttBrowserClient,
           friendlyName: friendlyName,
           state: dataReceivedOnSubscribe);
     }
