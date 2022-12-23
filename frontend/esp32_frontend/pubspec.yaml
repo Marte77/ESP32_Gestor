@@ -40,8 +40,10 @@ dependencies:
   mqtt_client: ^9.6.8
   logger: ^1.1.0
   binary: ^3.0.1
+  
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.11.0
   flutter_test:
     sdk: flutter
 
@@ -52,6 +54,23 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
 
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "web/icons/android-icon-192x192.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "web/icons/favicon-96x96.png"
+    background_color: "#00000000"
+    theme_color: "#FFE91E63"
+  windows:
+    generate: true
+    image_path: "web/icons/ms-icon-310x310.png"
+    icon_size: 256 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "web/icons/apple-icon-180x180.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
