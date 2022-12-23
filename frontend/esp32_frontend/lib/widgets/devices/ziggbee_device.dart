@@ -113,15 +113,9 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
     if (model == "TS0505B") {
       //ligar e desligar
       lista = TuyaTS0505B(
-        mqttClient: mqttClient,
-        friendlyName: friendlyName,
-        state: dataReceivedOnSubscribe,
-        submitAction: (payloadData_) {
-          setState(() {
-            payloadData = payloadData_;
-          });
-        },
-      );
+          mqttClient: mqttClient,
+          friendlyName: friendlyName,
+          state: dataReceivedOnSubscribe);
     }
 
     if (lista != null) {

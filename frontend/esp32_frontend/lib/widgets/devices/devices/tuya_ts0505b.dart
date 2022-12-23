@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:esp32_frontend/util/mqtt_subscriber_interface.dart';
 import 'package:esp32_frontend/widgets/devices/components/color_temp_with_preset.dart';
 import 'package:esp32_frontend/widgets/devices/components/efeitos_dropdown.dart';
 import 'package:esp32_frontend/widgets/devices/components/escolher_cor.dart';
@@ -7,7 +8,6 @@ import 'package:esp32_frontend/widgets/devices/components/ligar_desligar.dart';
 import 'package:esp32_frontend/widgets/devices/components/luminosidade.dart';
 import 'package:esp32_frontend/widgets/devices/components/power_on_behaviour.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
@@ -16,20 +16,19 @@ import '../ziggbee_device.dart';
 class TuyaTS0505B extends StatefulWidget {
   const TuyaTS0505B(
       {Key? key,
-      this.submitAction,
       required this.mqttClient,
       required this.state,
       required this.friendlyName})
       : super(key: key);
   final String friendlyName;
   final Map<String, dynamic> state;
-  final void Function(Map<String, dynamic>)? submitAction;
   final MqttServerClient mqttClient;
   @override
   State<TuyaTS0505B> createState() => _TuyaTS0505BState();
 }
 
-class _TuyaTS0505BState extends State<TuyaTS0505B> {
+class _TuyaTS0505BState extends State<TuyaTS0505B>
+    implements MQTTSubscriberInterface {
   Map<String, dynamic> payloadData = {
     "brightness": 254,
     "color": {
@@ -89,7 +88,6 @@ class _TuyaTS0505BState extends State<TuyaTS0505B> {
           .showSnackBar(const SnackBar(content: Text("Erro a subscrever")));
     }
     widget.mqttClient.updates!.listen((event) {
-      print("boas");
       for (var evento in event) {
         if (evento.topic == topic) {
           payloadData = jsonDecode(MqttPublishPayload.bytesToStringAsString(
@@ -103,23 +101,17 @@ class _TuyaTS0505BState extends State<TuyaTS0505B> {
   List<Widget> elementos(BuildContext context) {
     // ignore: prefer_function_declarations_over_variables
     void Function() sendColorTemp = () {
-      var builder = MqttClientPayloadBuilder();
-      builder.addString(jsonEncode({"color_temp": color_temp.round()}));
-      widget.mqttClient
-          .publishMessage('$topic/set', MqttQos.atMostOnce, builder.payload!);
+      publishChanges({"color_temp": color_temp.round()});
     };
     // ignore: prefer_function_declarations_over_variables
     void Function() sendNewColor = () {
-      var builder = MqttClientPayloadBuilder();
-      builder.addString(jsonEncode({
+      publishChanges({
         "color": {
           "rgb":
               "${selectedColor.red},${selectedColor.green},${selectedColor.blue}"
         }
-      }));
+      });
       payloadData["color_mode"] = "xy";
-      widget.mqttClient
-          .publishMessage('$topic/set', MqttQos.atMostOnce, builder.payload!);
     };
     return [
       LigarDesligar(
@@ -134,10 +126,7 @@ class _TuyaTS0505BState extends State<TuyaTS0505B> {
                 payloadData["state"] = "OFF";
               }
             });
-            var builder = MqttClientPayloadBuilder();
-            builder.addString(jsonEncode({"state": payloadData["state"]}));
-            widget.mqttClient.publishMessage(
-                '$topic/set', MqttQos.atMostOnce, builder.payload!);
+            publishChanges({"state": payloadData["state"]});
           }),
       const Divider(),
       LuminosidadeSlider(
@@ -149,10 +138,7 @@ class _TuyaTS0505BState extends State<TuyaTS0505B> {
             brightness = value;
             payloadData["brightness"] = brightness.round();
           });
-          var builder = MqttClientPayloadBuilder();
-          builder.addString(jsonEncode({"brightness": brightness.round()}));
-          widget.mqttClient.publishMessage(
-              '$topic/set', MqttQos.atMostOnce, builder.payload!);
+          publishChanges({"brightness": brightness.round()});
         },
       ),
       const Divider(),
@@ -206,17 +192,14 @@ class _TuyaTS0505BState extends State<TuyaTS0505B> {
           })),
       const Divider(),
       EscolherCor(
-        onChangeColor: (value) {
-          setState(() {
-            selectedColor = value;
-            payloadData["color"] = {
-              "hex": "#${selectedColor.value.toRadixString(16)}"
-            };
-          });
-        },
+        onChangeColor: (value) {},
         color: selectedColor,
         context: context,
-        onClosePopup: () {
+        onClosePopup: (chosenColor) {
+          selectedColor = chosenColor;
+          payloadData["color"] = {
+            "hex": "#${selectedColor.value.toRadixString(16)}"
+          };
           sendNewColor();
         },
       ),
@@ -228,11 +211,8 @@ class _TuyaTS0505BState extends State<TuyaTS0505B> {
               effectChosen = value;
             });
             if (effectChosen != effects.first.data!) {
-              var builder = MqttClientPayloadBuilder();
-              builder.addString(jsonEncode(
-                  {"effect": effectChosen.toLowerCase().replaceAll(' ', '_')}));
-              widget.mqttClient.publishMessage(
-                  '$topic/set', MqttQos.atMostOnce, builder.payload!);
+              publishChanges(
+                  {"effect": effectChosen.toLowerCase().replaceAll(' ', '_')});
             } else {
               if (payloadData["color_mode"] == "xy") {
                 sendNewColor();
@@ -255,23 +235,8 @@ class _TuyaTS0505BState extends State<TuyaTS0505B> {
             powerOnBehaviour = value;
             payloadData["power_on_behaviour"] = value;
           });
-          var builder = MqttClientPayloadBuilder();
-          builder.addString(
-              jsonEncode({"power_on_behavior": value.toLowerCase()}));
-          widget.mqttClient.publishMessage(
-              '$topic/set', MqttQos.atMostOnce, builder.payload!);
+          publishChanges({"power_on_behavior": value.toLowerCase()});
         }),
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: ElevatedButton(
-          onPressed: () {
-            if (widget.submitAction != null) {
-              widget.submitAction!(payloadData);
-            }
-          },
-          child: const Text("Submeter"),
-        ),
       )
     ];
   }
@@ -279,6 +244,26 @@ class _TuyaTS0505BState extends State<TuyaTS0505B> {
   ScrollController scrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
-    return Column(children: elementos(context));
+    return StreamBuilder<List<MqttReceivedMessage<MqttMessage>>>(
+      stream: widget.mqttClient.updates!,
+      builder: (context, snapshot) {
+        //nao preciso de fazer nada pois no initState já tenho a funcao a fazer listen
+        return Column(children: elementos(context));
+      },
+    );
+  }
+
+  @override
+  void subscribeToTopic() {
+    widget.mqttClient.subscribe(topic, MqttQos.atLeastOnce);
+  }
+
+  @override
+  void publishChanges(Map<String, dynamic> map) {
+    subscribeToTopic();
+    var builder = MqttClientPayloadBuilder();
+    builder.addString(jsonEncode(map));
+    widget.mqttClient
+        .publishMessage('$topic/set', MqttQos.atMostOnce, builder.payload!);
   }
 }

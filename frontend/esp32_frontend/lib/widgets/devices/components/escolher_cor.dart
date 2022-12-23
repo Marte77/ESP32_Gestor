@@ -14,7 +14,7 @@ class EscolherCor extends StatefulWidget {
       : super(key: key);
   final Color color;
   final void Function(Color newColor) onChangeColor;
-  final void Function() onClosePopup;
+  final void Function(Color chosenColor) onClosePopup;
   final BuildContext context;
   @override
   State<EscolherCor> createState() => _EscolherCorState();
@@ -55,7 +55,7 @@ class _EscolherCorState extends State<EscolherCor> {
                   child: const Text("Fechar"),
                   onPressed: () {
                     Navigator.of(context).pop();
-                    widget.onClosePopup();
+                    widget.onClosePopup(selectedColor);
                   },
                 )
               ],
