@@ -95,7 +95,7 @@ inline void setupWifi(){
 }
 inline void registarIPNoServidor(){
   Serial.println("vou registar");
-  String path = linkRegistarServidor + "/registar?ip=" + ip.toString()+ "?waitTime="+wait+"?modo="+modoToString()+"?"+corToString(cor);
+  String path = linkRegistarServidor + "/registar?ip=" + ip.toString()+ "&waitTime="+wait+"&modo="+modoToString()+"&cor="+corToString(cor);
   HTTPClient clientHTTP;
   clientHTTP.begin(path.c_str());
   clientHTTP.addHeader("Content-Type", "text/plain");
