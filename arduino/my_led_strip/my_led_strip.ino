@@ -52,6 +52,7 @@ uint32_t corToUInt(COR c){
 
 //PARA MUDAR FAZER
 // GET /mode/<nome do modo>?r=123,g=123,b=123,w=123
+//sempre que adicionares aqui, adiciona na funcao modoToString(), selectMode(), compararModo()
 typedef enum{
   EfadeEstatico=0,
   EcorEstatica,
@@ -98,11 +99,43 @@ inline void registarIPNoServidor(){
   HTTPClient clientHTTP;
   clientHTTP.begin(path.c_str());
   clientHTTP.addHeader("Content-Type", "text/plain");
-  int responseCode = clientHTTP.PUT(ip.toString());
+  int responseCode = clientHTTP.PUT(ip.toString() + ";waitTime="+wait+";modo="+modoToString()+";"+corToString(cor));
   if(responseCode>0){
     String response = clientHTTP.getString();
   }
   clientHTTP.end();
+}
+String corToString(COR c){
+  String s = "(";
+  s += c.r;
+  s += ",";
+  s += c.g;
+  s += ",";
+  s += c.b;
+  s += ",";
+  s += c.w;
+  s += ")";
+  return s;
+}
+String modoToString(){
+switch(modoLED){
+    case EfadeEstatico:
+      return "fadeEstatico";
+    case EcorEstatica:
+      return "corEstatica";
+    case EpreencherUmAUm:
+      return "preencherUmAUm";
+    case EpreencherUmAUmBounce:
+      return "preencherUmAUmBounce";
+    case EarcoIris:
+      return "arcoIris";
+    case EarcoIrisCycle:
+      return "arcoIrisCycle";
+    case EturnOff:
+      return "desligarLeds";
+    case EcintilarEstrelas:
+      return "cintilarEstrelas";
+  }
 }
 void setup() {
   Serial.begin(115200);

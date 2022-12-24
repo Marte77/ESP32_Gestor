@@ -8,7 +8,7 @@ db.pragma('journal_mode = WAL');
 const env = require('dotenv').config()
 app.use(cors())
 try {
-    db.exec("create table esp32(ipaddress text primary key, timestamp text)");
+    db.exec("create table esp32(ipaddress text primary key, timestamp text, cor text, modo text, waittime integer)");
 } catch (err) {
     if(!err.toString().indexOf("already exists") > 0){
         throw err
@@ -24,14 +24,20 @@ app.put('/registar', function (req,res){
     let sql = 'select * from esp32 where ipaddress = ?'
     let row = db.prepare(sql).get(req.query.ip)
     console.log(row)
+    let body = "" + req.body;
+    body = body.split(";")
     let data = {
         ipaddress: req.query.ip,
         timestamp: (new Date()).getTime()
     }
+    for (const coisa of body) {
+        let tipo = coisa.split("=")
+        data[tipo[0].toLowerCase()] = tipo[1];
+    }
     if(!row){
         //nao existe, vou criar
         try {
-            let novo = db.prepare('insert into esp32(ipaddress, timestamp) values (@ipaddress, @timestamp)').run(data)
+            let novo = db.prepare('insert into esp32(ipaddress, timestamp, cor, modo, waittime) values (@ipaddress, @timestamp, @cor,@modo,@waittime)').run(data)
             console.log(novo)
             res.status(200).send('top')
         } catch (error) {
