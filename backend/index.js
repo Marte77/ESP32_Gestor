@@ -34,7 +34,7 @@ app.put('/registar', function (req,res){
     if(!row){
         //nao existe, vou criar
         try {
-            let novo = db.prepare('insert into esp32(ipaddress, timestamp, cor, modo, waittime) values (@ipaddress, @timestamp, @cor,@modo,@waittime)').run(data)
+            let novo = db.prepare('insert into esp32(ipaddress, timestamp, cor, modo, waittime) values (@ipaddress, @timestamp, @cor, @modo, @waittime)').run(data)
             console.log(novo)
             res.status(200).send('top')
         } catch (error) {
@@ -45,7 +45,7 @@ app.put('/registar', function (req,res){
         return
     }
     
-    let result = db.prepare('update esp32 set timestamp = @timestamp where ipaddress = @ipaddress').run(data)
+    let result = db.prepare('update esp32 set timestamp = @timestamp, cor = @cor, waittime = @waittime, modo = @modo where ipaddress = @ipaddress').run(data)
     console.log(result)
     isRegistering = false
     res.status(200).send("top")
