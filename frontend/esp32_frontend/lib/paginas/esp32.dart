@@ -17,23 +17,32 @@ class PaginaEsp32 extends StatefulWidget {
 }
 
 class Esp32 {
-  Esp32(this.ipaddress, this.timestamp);
+  Esp32(this.ipaddress, this.timestamp, this.modo, this.cor, this.waitTime);
   String ipaddress;
   String timestamp;
+  String modo;
+  int waitTime;
+  Color cor;
   @override
   bool operator ==(other) => other is Esp32 && (other.ipaddress == ipaddress);
 
   @override
   int get hashCode => ipaddress.hashCode;
+
+  @override
+  String toString() {
+    return "ip $ipaddress; timestamp $timestamp; modo $modo; wait $waitTime; cor ${cor.toString()}";
+  }
 }
 
 class _PaginaEsp32State extends State<PaginaEsp32> {
   List<DropdownMenuItem<Esp32>> esps = [
     DropdownMenuItem(
-      value: Esp32("", ""),
+      value: Esp32("", "", "", Colors.pink, 50),
       child: const Text(""),
     )
   ];
+  Map<String, Map<String, dynamic>> mapEsps = {};
   Esp32? selected, emptyesp;
   List<String> metodos = [
     'fadeEstatico',
@@ -58,7 +67,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
     super.initState();
     emptyesp = esps.first.value;
     initAsync();
-    timer = Timer.periodic(const Duration(seconds: 15), ((timer) {
+    timer = Timer.periodic(const Duration(seconds: 90), ((timer) {
       initAsync();
     }));
   }
@@ -74,13 +83,25 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
     if (res.statusCode == 200) {
       List<dynamic> parsed = jsonDecode(res.body)['dados'];
       esps.clear();
+      mapEsps.clear();
       for (var esp in parsed) {
+        List<String> cores = (esp['cor']! as String)
+            .replaceAll("(", "")
+            .replaceAll(")", "")
+            .split(",");
         esps.add(DropdownMenuItem(
           value: Esp32(
               esp['ipaddress']!,
               (DateTime.fromMillisecondsSinceEpoch(
                       int.parse((esp['timestamp']! as String).split(".").first))
-                  .toIso8601String())),
+                  .toIso8601String()),
+              esp['modo'] as String,
+              Color.fromARGB(
+                  map(int.parse(cores.last).toDouble(), 0, 255, 255, 0).toInt(),
+                  int.parse(cores.first),
+                  int.parse(cores[1]),
+                  int.parse(cores[2])),
+              esp['waittime'] as int),
           child: Text(esp['ipaddress']!),
         ));
       }
@@ -88,6 +109,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
         selected = emptyesp;
       } else {
         selected = esps.first.value;
+        colorTheme.add(generateMaterialColor(color: selected!.cor));
       }
       setState(() {});
     }
@@ -145,12 +167,15 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                       Flexible(
                         child: TextFormField(
                           keyboardType: TextInputType.number,
-                          initialValue: waitTime.toString(),
+                          initialValue: selected == null
+                              ? waitTime.toString()
+                              : selected!.waitTime.toString(),
                           onChanged: (value) {
                             var aux = int.tryParse(value);
                             if (aux != null && aux > 0) {
                               setState(() {
                                 waitTime = aux;
+                                selected?.waitTime = aux;
                                 isWaitButtonEnabled = true;
                               });
                             } else {
@@ -185,7 +210,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                     child: Divider(),
                   ),
                   DropdownButton(
-                    value: selectedMetodo,
+                    value: selected == null ? selectedMetodo : selected!.modo,
                     items: List.generate(
                         metodos.length,
                         (index) => DropdownMenuItem(
@@ -196,6 +221,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                       if (val != null) {
                         setState(() {
                           selectedMetodo = val;
+                          selected?.modo = val;
                         });
                       }
                     },
@@ -218,10 +244,13 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                             contentPadding: const EdgeInsets.all(0),
                             content: SingleChildScrollView(
                               child: ColorPicker(
-                                pickerColor: selectedColor!,
+                                pickerColor: selected == null
+                                    ? selectedColor!
+                                    : selected!.cor,
                                 onColorChanged: ((value) {
                                   setState(() {
                                     selectedColor = value;
+                                    selected?.cor = value;
                                     colorTheme.add(
                                         generateMaterialColor(color: value));
                                   });
@@ -240,8 +269,8 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                       );
                     },
                     style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(selectedColor)),
+                        backgroundColor: MaterialStateProperty.all(
+                            selected == null ? selectedColor : selected!.cor)),
                     child: const Text("Cor selecionada"),
                   ),
                   TextFormField(
