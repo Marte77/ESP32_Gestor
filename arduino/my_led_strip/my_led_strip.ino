@@ -95,11 +95,11 @@ inline void setupWifi(){
 }
 inline void registarIPNoServidor(){
   Serial.println("vou registar");
-  String path = linkRegistarServidor + "/registar?ip=" + ip.toString();
+  String path = linkRegistarServidor + "/registar?ip=" + ip.toString()+ "?waitTime="+wait+"?modo="+modoToString()+"?"+corToString(cor);
   HTTPClient clientHTTP;
   clientHTTP.begin(path.c_str());
   clientHTTP.addHeader("Content-Type", "text/plain");
-  int responseCode = clientHTTP.PUT(ip.toString() + ";waitTime="+wait+";modo="+modoToString()+";"+corToString(cor));
+  int responseCode = clientHTTP.PUT(ip.toString());
   if(responseCode>0){
     String response = clientHTTP.getString();
   }

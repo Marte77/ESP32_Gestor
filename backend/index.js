@@ -24,15 +24,12 @@ app.put('/registar', function (req,res){
     let sql = 'select * from esp32 where ipaddress = ?'
     let row = db.prepare(sql).get(req.query.ip)
     console.log(row)
-    let body = "" + req.body;
-    body = body.split(";")
     let data = {
         ipaddress: req.query.ip,
-        timestamp: (new Date()).getTime()
-    }
-    for (const coisa of body) {
-        let tipo = coisa.split("=")
-        data[tipo[0].toLowerCase()] = tipo[1];
+        timestamp: (new Date()).getTime(),
+        cor: req.query.cor,
+        waittime: req.query.waitTime,
+        modo: req.query.modo
     }
     if(!row){
         //nao existe, vou criar
