@@ -8,8 +8,6 @@ import 'package:esp32_frontend/widgets/devices/ziggbee_device.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
-import 'dart:js' as js;
-
 class TuyaTS0505bMainCard extends StatefulWidget {
   const TuyaTS0505bMainCard(
       {Key? key,
