@@ -17,7 +17,11 @@ class PaginaEsp32 extends StatefulWidget {
 }
 
 class Esp32 {
-  Esp32(this.ipaddress, this.timestamp, this.modo, this.cor, this.waitTime);
+  Esp32(this.ipaddress, this.timestamp, this.modo, this.cor, this.waitTime) {
+    if (modo.toLowerCase() == "desligarleds") {
+      modo = "turnOff";
+    }
+  }
   String ipaddress;
   String timestamp;
   String modo;
@@ -32,6 +36,11 @@ class Esp32 {
   @override
   String toString() {
     return "ip $ipaddress; timestamp $timestamp; modo $modo; wait $waitTime; cor ${cor.toString()}";
+  }
+
+  static double map(
+      double x, double in_min, double in_max, double out_min, double out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
   }
 }
 
@@ -72,11 +81,6 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
     }));
   }
 
-  static double map(
-      double x, double in_min, double in_max, double out_min, double out_max) {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-  }
-
   void initAsync() async {
     var url = Uri.http('192.168.3.0:8080', 'getall');
     var res = await http.get(url);
@@ -97,7 +101,8 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                   .toIso8601String()),
               esp['modo'] as String,
               Color.fromARGB(
-                  map(int.parse(cores.last).toDouble(), 0, 255, 255, 0).toInt(),
+                  Esp32.map(int.parse(cores.last).toDouble(), 0, 255, 255, 0)
+                      .toInt(),
                   int.parse(cores.first),
                   int.parse(cores[1]),
                   int.parse(cores[2])),
@@ -327,7 +332,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                             .withAlpha(0); //alpha a 0 porque inverte
                       }
                       var url = Uri.http(selected!.ipaddress,
-                          "mode/$selectedMetodo?r=${selectedColor!.red},g=${selectedColor!.green},b=${selectedColor!.blue},w=${map(selectedColor!.alpha.toDouble(), 0, 255, 255, 0)},br=$brightnessVal");
+                          "mode/$selectedMetodo?r=${selectedColor!.red},g=${selectedColor!.green},b=${selectedColor!.blue},w=${Esp32.map(selectedColor!.alpha.toDouble(), 0, 255, 255, 0)},br=$brightnessVal");
                       http
                           .get(url)
                           .then((value) => null)

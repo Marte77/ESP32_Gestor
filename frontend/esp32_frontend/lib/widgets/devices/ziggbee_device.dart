@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
-import 'devices/tuya_ts0505b.dart';
+import 'devices/tuya_ts0505b/tuya_ts0505b.dart';
 
 class ZigBeeDevice extends StatefulWidget {
   const ZigBeeDevice(

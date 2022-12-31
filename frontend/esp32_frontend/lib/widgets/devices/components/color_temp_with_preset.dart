@@ -25,20 +25,24 @@ class _ColorTempWithPresetState extends State<ColorTempWithPreset> {
   List<bool> selectedVal = [];
   @override
   void initState() {
-    value = widget.value < widget.min
-        ? widget.min
-        : widget.value > widget.max
-            ? widget.max
-            : widget.value;
-
+    checkValue();
     assert(widget.colorTempTemplatesBool.length ==
         widget.colorTempTemplatesNames.length);
     selectedVal = widget.colorTempTemplatesBool;
     super.initState();
   }
 
+  checkValue() {
+    value = widget.value < widget.min
+        ? widget.min
+        : widget.value > widget.max
+            ? widget.max
+            : widget.value;
+  }
+
   @override
   Widget build(BuildContext context) {
+    checkValue();
     return Column(
       children: [
         ToggleButtons(

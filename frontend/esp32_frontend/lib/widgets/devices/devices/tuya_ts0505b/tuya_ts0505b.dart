@@ -10,7 +10,7 @@ import 'package:esp32_frontend/widgets/devices/components/power_on_behaviour.dar
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
-import '../ziggbee_device.dart';
+import '../../ziggbee_device.dart';
 
 class TuyaTS0505B extends StatefulWidget {
   const TuyaTS0505B(
@@ -266,5 +266,16 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
     builder.addString(jsonEncode(map));
     mqttClient.publishMessage(
         '$topic/set', MqttQos.atMostOnce, builder.payload!);
+  }
+
+  @override
+  void unsubscribeToTopic() {
+    mqttClient.unsubscribe(topic);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    unsubscribeToTopic();
   }
 }
