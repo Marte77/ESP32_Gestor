@@ -4,10 +4,9 @@ const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
   "version.json": "5399f578a865f063c83a1e7f4ecee330",
-"index.html": "74e6d8fabda0caf2cec8fbcff873c2b6",
-"/": "74e6d8fabda0caf2cec8fbcff873c2b6",
+"index.html": "cf7198da7a46895b434e188a2554a08c",
+"/": "cf7198da7a46895b434e188a2554a08c",
 "main.dart.js": "e1bbe043371f38bfbdb645b138fc728d",
-"flutter.js": "eb2682e33f25cd8f1fc59011497c35f8",
 "favicon.png": "efbb1a1934015b8648451b288c5f97db",
 "icons/favicon-16x16.png": "2370db5b8ae4df7926bbc512d4add6b0",
 "icons/favicon.ico": "0fe4c415480298aeb36d947072142e49",
@@ -47,11 +46,7 @@ const RESOURCES = {
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "6d342eb68f170c97609e9da345464e5e",
 "assets/fonts/MaterialIcons-Regular.otf": "95db9098c58fd6db106f1116bae85a0b",
 "assets/assets/images/pizza.jpg": "ad5a19413f83906863d5765a7fd6c590",
-"assets/assets/images/burger.jpg": "e41744739e09d8b99bbbcca87d94234d",
-"canvaskit/canvaskit.js": "c2b4e5f3d7a3d82aed024e7249a78487",
-"canvaskit/profiling/canvaskit.js": "ae2949af4efc61d28a4a80fffa1db900",
-"canvaskit/profiling/canvaskit.wasm": "95e736ab31147d1b2c7b25f11d4c32cd",
-"canvaskit/canvaskit.wasm": "4b83d89d9fecbea8ca46f2f760c5a9ba"
+"assets/assets/images/burger.jpg": "e41744739e09d8b99bbbcca87d94234d"
 };
 
 // The application shell files that are downloaded before a service worker can
