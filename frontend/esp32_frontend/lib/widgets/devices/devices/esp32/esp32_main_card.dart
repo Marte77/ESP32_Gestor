@@ -27,9 +27,12 @@ class _Esp32MainCardState extends State<Esp32MainCard> {
     setState(() {});
   }
 
-  void ligar() {
+  void ligar(String modo) {
+    if (modo == "corEstatica") {
+      widget.esp32.cor = const Color.fromARGB(0, 0, 0, 0);
+    }
     var url = Uri.http(widget.esp32.ipaddress,
-        "mode/$modoAnterior?r=${widget.esp32.cor.red},g=${widget.esp32.cor.green},b=${widget.esp32.cor.blue},w=${Esp32.map(widget.esp32.cor.alpha.toDouble(), 0, 255, 255, 0)},br=255");
+        "mode/$modo?r=${widget.esp32.cor.red},g=${widget.esp32.cor.green},b=${widget.esp32.cor.blue},w=${Esp32.map(widget.esp32.cor.alpha.toDouble(), 0, 255, 255, 0)},br=255");
     http.get(url).then((value) => null).onError((error, stackTrace) {
       return null;
     });
@@ -58,8 +61,10 @@ class _Esp32MainCardState extends State<Esp32MainCard> {
             child: const Text("Desligar"),
           ),
           ElevatedButton(
-              onPressed: () => ligar(),
-              child: Text("Voltar ao modo: $modoAnterior"))
+              onPressed: () => ligar(modoAnterior),
+              child: Text("Voltar ao modo: $modoAnterior")),
+          ElevatedButton(
+              onPressed: () => ligar("corEstatica"), child: const Text("Ligar"))
         ]),
       ),
     );
