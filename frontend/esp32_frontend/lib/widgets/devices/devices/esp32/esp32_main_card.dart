@@ -56,7 +56,10 @@ class _Esp32MainCardState extends State<Esp32MainCard> {
           ElevatedButton(
             onPressed: () => desligar(),
             child: const Text("Desligar"),
-          )
+          ),
+          ElevatedButton(
+              onPressed: () => ligar(),
+              child: Text("Voltar ao modo: $modoAnterior"))
         ]),
       ),
     );
