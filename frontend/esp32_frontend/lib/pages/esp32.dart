@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:esp32_frontend/main.dart';
+import 'package:esp32_frontend/widgets/other/MyButton.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -140,13 +141,17 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                     "O valor Alpha na selecao de cores, define a cor Branca dos leds.\nCertos modos ignoram a cor e brilho selecionados"),
                 leading: const CircleAvatar(child: Icon(Icons.warning)),
                 actions: [
-                  TextButton(
-                    child: const Text('             '),
-                    onPressed: () {},
+                  UnselectableTextButton(
+                    child: TextButton(
+                      child: const Text('             '),
+                      onPressed: () {},
+                    ),
                   ),
-                  TextButton(
-                    child: const Text('             '),
-                    onPressed: () {},
+                  UnselectableTextButton(
+                    child: TextButton(
+                      child: const Text('             '),
+                      onPressed: () {},
+                    ),
                   ),
                 ],
               ),
@@ -194,20 +199,21 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                       const SizedBox(
                         width: 20,
                       ),
-                      OutlinedButton(
-                          onPressed: isWaitButtonEnabled
-                              ? () {
-                                  var url = Uri.http(
-                                      selected!.ipaddress, "wait/$waitTime");
-                                  http
-                                      .get(url)
-                                      .then((value) => null)
-                                      .onError((error, stackTrace) {
-                                    return null;
-                                  });
-                                }
-                              : null,
-                          child: const Text('Definir tempo de espera'))
+                      UnselectableOutlinedButton(
+                          child: OutlinedButton(
+                              onPressed: isWaitButtonEnabled
+                                  ? () {
+                                      var url = Uri.http(selected!.ipaddress,
+                                          "wait/$waitTime");
+                                      http
+                                          .get(url)
+                                          .then((value) => null)
+                                          .onError((error, stackTrace) {
+                                        return null;
+                                      });
+                                    }
+                                  : null,
+                              child: const Text('Definir tempo de espera'))),
                     ],
                   ),
                   const Padding(
@@ -239,44 +245,49 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                           isFullWhite = value;
                         }),
                       )),
-                  ElevatedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: ((context) {
-                          return AlertDialog(
-                            titlePadding: const EdgeInsets.all(0),
-                            contentPadding: const EdgeInsets.all(0),
-                            content: SingleChildScrollView(
-                              child: ColorPicker(
-                                pickerColor: selected == null
-                                    ? selectedColor!
-                                    : selected!.cor,
-                                onColorChanged: ((value) {
-                                  setState(() {
-                                    selectedColor = value;
-                                    selected?.cor = value;
-                                    colorTheme.add(
-                                        generateMaterialColor(color: value));
-                                  });
-                                }),
-                                portraitOnly: true,
+                  UnselectableElevatedButton(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: ((context) {
+                            return AlertDialog(
+                              titlePadding: const EdgeInsets.all(0),
+                              contentPadding: const EdgeInsets.all(0),
+                              content: SingleChildScrollView(
+                                child: ColorPicker(
+                                  pickerColor: selected == null
+                                      ? selectedColor!
+                                      : selected!.cor,
+                                  onColorChanged: ((value) {
+                                    setState(() {
+                                      selectedColor = value;
+                                      selected?.cor = value;
+                                      colorTheme.add(
+                                          generateMaterialColor(color: value));
+                                    });
+                                  }),
+                                  portraitOnly: true,
+                                ),
                               ),
-                            ),
-                            actions: [
-                              TextButton(
-                                child: const Text("Fechar"),
-                                onPressed: () => Navigator.of(context).pop(),
-                              )
-                            ],
-                          );
-                        }),
-                      );
-                    },
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                            selected == null ? selectedColor : selected!.cor)),
-                    child: const Text("Cor selecionada"),
+                              actions: [
+                                UnselectableTextButton(
+                                    child: TextButton(
+                                  child: const Text("Fechar"),
+                                  onPressed: () => Navigator.of(context).pop(),
+                                )),
+                              ],
+                            );
+                          }),
+                        );
+                      },
+                      style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                              selected == null
+                                  ? selectedColor
+                                  : selected!.cor)),
+                      child: const Text("Cor selecionada"),
+                    ),
                   ),
                   TextFormField(
                     keyboardType: TextInputType.number,
@@ -307,7 +318,8 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                   const SizedBox(
                     height: 10,
                   ),
-                  ElevatedButton(
+                  UnselectableElevatedButton(
+                      child: ElevatedButton(
                     onPressed: (() async {
                       if (!formGlobalKey.currentState!.validate()) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -341,7 +353,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                       });
                     }),
                     child: const Text("Enviar"),
-                  )
+                  )),
                 ]),
               )
             ],

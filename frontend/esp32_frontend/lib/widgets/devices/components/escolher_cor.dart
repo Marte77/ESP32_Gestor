@@ -1,3 +1,4 @@
+import 'package:esp32_frontend/widgets/other/MyButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -28,42 +29,45 @@ class _EscolherCorState extends State<EscolherCor> {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: ((context) {
-            return AlertDialog(
-              titlePadding: const EdgeInsets.all(0),
-              contentPadding: const EdgeInsets.all(0),
-              content: SingleChildScrollView(
-                child: ColorPicker(
-                  pickerColor: selectedColor,
-                  onColorChanged: ((value) {
-                    widget.onChangeColor(value);
-                    setState(() {
-                      selectedColor = value;
-                    });
-                  }),
-                  portraitOnly: true,
+    return UnselectableElevatedButton(
+      child: ElevatedButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: ((context) {
+              return AlertDialog(
+                titlePadding: const EdgeInsets.all(0),
+                contentPadding: const EdgeInsets.all(0),
+                content: SingleChildScrollView(
+                  child: ColorPicker(
+                    pickerColor: selectedColor,
+                    onColorChanged: ((value) {
+                      widget.onChangeColor(value);
+                      setState(() {
+                        selectedColor = value;
+                      });
+                    }),
+                    portraitOnly: true,
+                  ),
                 ),
-              ),
-              actions: [
-                TextButton(
-                  child: const Text("Fechar"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    widget.onClosePopup(selectedColor);
-                  },
-                )
-              ],
-            );
-          }),
-        );
-      },
-      style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all(selectedColor)),
-      child: const Text("Cor selecionada"),
+                actions: [
+                  UnselectableTextButton(
+                      child: TextButton(
+                    child: const Text("Fechar"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      widget.onClosePopup(selectedColor);
+                    },
+                  )),
+                ],
+              );
+            }),
+          );
+        },
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(selectedColor)),
+        child: const Text("Cor selecionada"),
+      ),
     );
   }
 }

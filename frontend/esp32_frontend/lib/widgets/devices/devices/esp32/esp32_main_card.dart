@@ -1,4 +1,5 @@
 import 'package:esp32_frontend/pages/esp32.dart';
+import 'package:esp32_frontend/widgets/other/MyButton.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -56,15 +57,21 @@ class _Esp32MainCardState extends State<Esp32MainCard> {
               height: 30,
             ),
           ]),
-          ElevatedButton(
-            onPressed: () => desligar(),
-            child: const Text("Desligar"),
+          UnselectableElevatedButton(
+            child: ElevatedButton(
+              onPressed: () => desligar(),
+              child: const Text("Desligar"),
+            ),
           ),
-          ElevatedButton(
-              onPressed: () => ligar(modoAnterior),
-              child: Text("Voltar ao modo: $modoAnterior")),
-          ElevatedButton(
-              onPressed: () => ligar("corEstatica"), child: const Text("Ligar"))
+          UnselectableElevatedButton(
+            child: ElevatedButton(
+                onPressed: () => ligar(modoAnterior),
+                child: Text("Voltar ao modo: $modoAnterior")),
+          ),
+          UnselectableElevatedButton(
+              child: ElevatedButton(
+                  onPressed: () => ligar("corEstatica"),
+                  child: const Text("Ligar"))),
         ]),
       ),
     );

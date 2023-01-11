@@ -5,6 +5,7 @@ import 'package:esp32_frontend/pages/zigbee.dart';
 import 'package:esp32_frontend/util/support_web_mobile/mqtt_finder.dart';
 import 'package:esp32_frontend/widgets/devices/devices/esp32/esp32_main_card.dart';
 import 'package:esp32_frontend/widgets/devices/devices/tuya_ts0505b/tuya_ts0505b_main_card.dart';
+import 'package:esp32_frontend/widgets/other/MyButton.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +28,10 @@ class MyApp extends StatelessWidget {
       stream: colorTheme.stream,
       builder: ((context, snapshot) {
         MaterialColor? data = snapshot.data;
-        if(snapshot.hasData){
-          if(snapshot.data!.alpha != 255){
-            data = generateMaterialColor(color: snapshot.data!.withOpacity(1).withAlpha(255));
+        if (snapshot.hasData) {
+          if (snapshot.data!.alpha != 255) {
+            data = generateMaterialColor(
+                color: snapshot.data!.withOpacity(1).withAlpha(255));
           }
         }
         return MaterialApp(
@@ -47,10 +49,12 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute<void>(
               settings: settings,
               builder: (BuildContext context) => Scaffold(
-                  body: ElevatedButton(
-                      onPressed: () =>
-                          Navigator.popUntil(context, (route) => route.isFirst),
-                      child: const Text('Not Found'))),
+                body: UnselectableElevatedButton(
+                    child: ElevatedButton(
+                        onPressed: () => Navigator.popUntil(
+                            context, (route) => route.isFirst),
+                        child: const Text('Not Found'))),
+              ),
             );
           },
         );
@@ -164,12 +168,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void createCardsZig() {
-    if(mqttClient.connectionStatus == null || (mqttClient.connectionStatus!.state == MqttConnectionState.disconnected || mqttClient.connectionStatus!.state == MqttConnectionState.disconnecting)){
-      while(mqttClient.connectionStatus!.state == MqttConnectionState.disconnecting){}
+    if (mqttClient.connectionStatus == null ||
+        (mqttClient.connectionStatus!.state ==
+                MqttConnectionState.disconnected ||
+            mqttClient.connectionStatus!.state ==
+                MqttConnectionState.disconnecting)) {
+      while (mqttClient.connectionStatus!.state ==
+          MqttConnectionState.disconnecting) {}
       final connMess = MqttConnectMessage()
           .withClientIdentifier('Mqtt_MyClientUniqueId')
           .withWillTopic(
-          'willtopic') // If you set this you must set a will message
+              'willtopic') // If you set this you must set a will message
           .withWillMessage('My Will message')
           .startClean() // Non persistent session for testing
           .withWillQos(MqttQos.atLeastOnce);
@@ -209,11 +218,11 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage('assets/images/pizza.jpg'), fit: BoxFit.fill),
+                  image: AssetImage('assets/images/pizza.jpg'),
+                  fit: BoxFit.fill),
             ),
             child: SingleChildScrollView(child: Column(children: cards)),
           ),
-        )
-        );
+        ));
   }
 }

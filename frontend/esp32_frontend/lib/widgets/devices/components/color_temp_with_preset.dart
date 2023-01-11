@@ -1,3 +1,4 @@
+import 'package:esp32_frontend/widgets/other/MyButton.dart';
 import 'package:flutter/material.dart';
 
 class ColorTempWithPreset extends StatefulWidget {
@@ -59,20 +60,21 @@ class _ColorTempWithPresetState extends State<ColorTempWithPreset> {
             widget.onChangeEnd(val);
           },
         ),
-        ToggleButtons(
-            isSelected: widget.colorTempTemplatesBool,
-            onPressed: (index) {
-              widget.onPressed(index);
-              setState(() {
-                for (var i = 0; i < selectedVal.length; i++) {
-                  selectedVal[i] = false;
-                }
-                selectedVal[index] = true;
-                value = widget.value;
-              });
-            },
-            borderRadius: BorderRadius.circular(4.0),
-            children: widget.colorTempTemplatesNames),
+        UnselectableToggleButton(
+            child: ToggleButtons(
+                isSelected: widget.colorTempTemplatesBool,
+                onPressed: (index) {
+                  widget.onPressed(index);
+                  setState(() {
+                    for (var i = 0; i < selectedVal.length; i++) {
+                      selectedVal[i] = false;
+                    }
+                    selectedVal[index] = true;
+                    value = widget.value;
+                  });
+                },
+                borderRadius: BorderRadius.circular(4.0),
+                children: widget.colorTempTemplatesNames)),
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'package:esp32_frontend/widgets/devices/components/build_exception.dart';
+import 'package:esp32_frontend/widgets/other/MyButton.dart';
 import 'package:flutter/material.dart';
 import 'package:esp32_frontend/util/string_extension.dart';
 
@@ -36,16 +37,17 @@ class _PowerOnBehaviourToggleState extends State<PowerOnBehaviourToggle> {
 
   @override
   Widget build(BuildContext context) {
-    return ToggleButtons(
-        isSelected: toggleListBool,
-        onPressed: (index) {
-          for (var i = 0; i < toggleListBool.length; i++) {
-            toggleListBool[i] = false;
-          }
-          toggleListBool[index] = true;
-          widget.onPressed(toggleList[index].data!);
-        },
-        borderRadius: BorderRadius.circular(4.0),
-        children: toggleList);
+    return UnselectableToggleButton(
+        child: ToggleButtons(
+            isSelected: toggleListBool,
+            onPressed: (index) {
+              for (var i = 0; i < toggleListBool.length; i++) {
+                toggleListBool[i] = false;
+              }
+              toggleListBool[index] = true;
+              widget.onPressed(toggleList[index].data!);
+            },
+            borderRadius: BorderRadius.circular(4.0),
+            children: toggleList));
   }
 }
