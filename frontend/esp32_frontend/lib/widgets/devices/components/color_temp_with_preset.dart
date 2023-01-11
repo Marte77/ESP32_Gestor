@@ -42,9 +42,23 @@ class _ColorTempWithPresetState extends State<ColorTempWithPreset> {
 
   @override
   Widget build(BuildContext context) {
-    checkValue();
     return Column(
       children: [
+        Text("Temperatura: ${value.round()}"),
+        Slider(
+          value: value,
+          min: widget.min,
+          max: widget.max,
+          label: value.round().toString(),
+          onChanged: (val) {
+            setState(() {
+              value = val;
+            });
+          },
+          onChangeEnd: (val) {
+            widget.onChangeEnd(val);
+          },
+        ),
         ToggleButtons(
             isSelected: widget.colorTempTemplatesBool,
             onPressed: (index) {
@@ -59,21 +73,6 @@ class _ColorTempWithPresetState extends State<ColorTempWithPreset> {
             },
             borderRadius: BorderRadius.circular(4.0),
             children: widget.colorTempTemplatesNames),
-        Text("Temperatura: ${value.round()}"),
-        Slider(
-          value: value,
-          min: widget.min,
-          max: widget.max,
-          label: value.round().toString(),
-          onChanged: (val) {
-            setState(() {
-              value = val;
-            });
-          },
-          onChangeEnd: (value) {
-            widget.onChangeEnd(value);
-          },
-        )
       ],
     );
   }

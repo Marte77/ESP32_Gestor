@@ -10,7 +10,7 @@ import 'package:esp32_frontend/widgets/devices/components/power_on_behaviour.dar
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
-import '../../ziggbee_device.dart';
+import '../../zigbee_device.dart';
 
 class TuyaTS0505B extends StatefulWidget {
   const TuyaTS0505B(
@@ -69,9 +69,9 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
     selectedColor = ZigBeeDevice.convert_xyY_to_XYZ(
         payloadData["color"]["x"],
         payloadData["color"]["y"],
-        100); //((payloadData["color"]["saturation"]) as int).toDouble());
+        100);
     color_temp = (payloadData["color_temp"] as int).toDouble();
-    powerOnBehaviour = payloadData["power_on_behavior"];
+    powerOnBehaviour = payloadData["power_on_behavior"] ?? ZigBeeDevice.nullComponent;
   }
 
   @override
@@ -223,6 +223,7 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
             }
           }),
       const Divider(),
+      if(powerOnBehaviour != ZigBeeDevice.nullComponent)
       PowerOnBehaviourToggle(
         toggleList: const [
           Text("Off"),

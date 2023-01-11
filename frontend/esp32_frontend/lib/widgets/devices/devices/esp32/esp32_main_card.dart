@@ -1,4 +1,4 @@
-import 'package:esp32_frontend/paginas/esp32.dart';
+import 'package:esp32_frontend/pages/esp32.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 

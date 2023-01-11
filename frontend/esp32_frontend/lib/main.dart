@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:esp32_frontend/paginas/esp32.dart';
-import 'package:esp32_frontend/paginas/zigbee.dart';
+import 'package:esp32_frontend/pages/esp32.dart';
+import 'package:esp32_frontend/pages/zigbee.dart';
 import 'package:esp32_frontend/util/support_web_mobile/mqtt_finder.dart';
 import 'package:esp32_frontend/widgets/devices/devices/esp32/esp32_main_card.dart';
 import 'package:esp32_frontend/widgets/devices/devices/tuya_ts0505b/tuya_ts0505b_main_card.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:material_color_generator/material_color_generator.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:http/http.dart' as http;
 
@@ -25,12 +26,18 @@ class MyApp extends StatelessWidget {
       initialData: Colors.pink,
       stream: colorTheme.stream,
       builder: ((context, snapshot) {
+        MaterialColor? data = snapshot.data;
+        if(snapshot.hasData){
+          if(snapshot.data!.alpha != 255){
+            data = generateMaterialColor(color: snapshot.data!.withOpacity(1).withAlpha(255));
+          }
+        }
         return MaterialApp(
           title: 'Mudar Leds',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-              primarySwatch: snapshot.data ?? Colors.pink,
-              splashFactory: InkSplash.splashFactory),
+              primarySwatch: data ?? Colors.pink,
+              splashFactory: InkRipple.splashFactory),
           routes: {
             '/': (context) => const MyHomePage(title: "Pagina inicial"),
             '/esp32': (context) => const PaginaEsp32(),
@@ -157,6 +164,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void createCardsZig() {
+    if(mqttClient.connectionStatus == null || (mqttClient.connectionStatus!.state == MqttConnectionState.disconnected || mqttClient.connectionStatus!.state == MqttConnectionState.disconnecting)){
+      while(mqttClient.connectionStatus!.state == MqttConnectionState.disconnecting){}
+      final connMess = MqttConnectMessage()
+          .withClientIdentifier('Mqtt_MyClientUniqueId')
+          .withWillTopic(
+          'willtopic') // If you set this you must set a will message
+          .withWillMessage('My Will message')
+          .startClean() // Non persistent session for testing
+          .withWillQos(MqttQos.atLeastOnce);
+      mqttClient.connectionMessage = connMess;
+      mqttClient.connect().catchError((e) {
+        if (kDebugMode) {
+          print(e);
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Erro a conectar tenta mais tarde")));
+      });
+    }
     for (var zig in listaDevicesMqtt) {
       if (zig["model"] == "TS0505B") {
         cards.add(TuyaTS0505bMainCard(

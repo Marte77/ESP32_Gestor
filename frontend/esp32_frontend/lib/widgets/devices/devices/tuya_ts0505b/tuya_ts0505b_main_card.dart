@@ -4,7 +4,7 @@ import 'package:esp32_frontend/util/mqtt_subscriber_interface.dart';
 import 'package:esp32_frontend/widgets/devices/components/escolher_cor.dart';
 import 'package:esp32_frontend/widgets/devices/components/ligar_desligar.dart';
 import 'package:esp32_frontend/widgets/devices/components/luminosidade.dart';
-import 'package:esp32_frontend/widgets/devices/ziggbee_device.dart';
+import 'package:esp32_frontend/widgets/devices/zigbee_device.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 

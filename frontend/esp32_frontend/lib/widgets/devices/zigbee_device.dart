@@ -19,9 +19,9 @@ class ZigBeeDevice extends StatefulWidget {
   final AppBar appBar;
   final MqttClient? mqttClient;
   final Map<String, dynamic> device;
-
-  // ignore: non_constant_identifier_names
+  static const String nullComponent = "NULO!_";
   /// param Y normalmente é a brightness
+  // ignore: non_constant_identifier_names
   static Color convert_xyY_to_XYZ(double x, double y, double Y) {
     if (y == 0) return const Color.fromARGB(0, 0, 0, 0);
     //https://github.com/Shnoo/js-CIE-1931-rgb-color-converter/blob/master/ColorConverter.js#L211
@@ -74,7 +74,6 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
   @override
   void initState() {
     super.initState();
-
     setState(() {
       title = widget.device["friendly_name"];
       friendlyName = title;
@@ -136,7 +135,7 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
         child: SingleChildScrollView(
             controller: scrollController,
             child: Column(children: [
-              Text(title),
+              Padding(padding: const EdgeInsets.only(top:10, bottom: 15), child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),),
               Text(description),
               Text(model),
               Text(vendor),

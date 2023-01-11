@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:esp32_frontend/util/support_web_mobile/mqtt_finder.dart';
-import 'package:esp32_frontend/widgets/devices/ziggbee_device.dart';
+import 'package:esp32_frontend/widgets/devices/zigbee_device.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -80,6 +80,12 @@ class _PaginaZigbeeState extends State<PaginaZigbee> {
   void mqttOnConnected() {}
 
   @override
+  void dispose() {
+    mqttClient.disconnect();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var myAppBar = AppBar(
       title: const Text("ZigBee"),
@@ -95,11 +101,10 @@ class _PaginaZigbeeState extends State<PaginaZigbee> {
                         child: Scrollbar(
                       controller: scrollBarCardController,
                       thumbVisibility: true,
-                      child: PageView.builder(
+                      child: ListView.builder(
                           itemCount: listaDevices.length,
                           controller: scrollBarCardController,
-                          onPageChanged: (value) =>
-                              setState((() => deviceCardIndex = value)),
+                          scrollDirection: Axis.horizontal,
                           itemBuilder: (context, index) {
                             return ZigBeeDevice(
                               appBar: myAppBar,
