@@ -214,15 +214,14 @@ class _MyHomePageState extends State<MyHomePage> {
           title: const Text("Inicio"),
         ),
         drawer: const NavDrawer(),
-        body: SelectionArea(
-          child: Container(
+        body: Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('assets/images/pizza.jpg'),
                   fit: BoxFit.fill),
             ),
-            child: SingleChildScrollView(child: Column(children: cards)),
+            child: SingleChildScrollView(child: SelectionArea(child:Column(children: cards))),
           ),
-        ));
+        );
   }
 }
