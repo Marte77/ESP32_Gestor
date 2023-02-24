@@ -40,18 +40,20 @@ class _EfeitosDropdownState extends State<EfeitosDropdown> {
           padding: EdgeInsets.symmetric(vertical: 5),
           child: Text("Efeitos:"),
         ),
-        DropdownButton<String>(
-          value: effectChosen,
-          onChanged: (value) {
-            if (value != null) {
-              widget.onChanged(value);
-              setState(() {
-                effectChosen = value;
-              });
-            }
-          },
-          items: dropDownList,
-        ),
+        MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: DropdownButton<String>(
+              value: effectChosen,
+              onChanged: (value) {
+                if (value != null) {
+                  widget.onChanged(value);
+                  setState(() {
+                    effectChosen = value;
+                  });
+                }
+              },
+              items: dropDownList,
+            )),
       ],
     );
   }

@@ -21,13 +21,19 @@ class NavDrawer extends StatelessWidget {
             ),
           ),
           ListTile(
-            title: const Text("Esp32"),
+            title: const MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Text("Esp32"),
+            ),
             onTap: () {
               Navigator.pushNamed(context, "/esp32");
             },
           ),
           ListTile(
-            title: const Text("ZigBee"),
+            title: const MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Text("ZigBee"),
+            ),
             onTap: () {
               Navigator.pushNamed(context, "/zigbee");
             },

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:esp32_frontend/main.dart';
-import 'package:esp32_frontend/widgets/other/MyButton.dart';
+import 'package:esp32_frontend/widgets/other/my_button.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

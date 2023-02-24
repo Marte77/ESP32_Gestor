@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 class UnselectableElevatedButton extends StatelessWidget {
@@ -8,7 +6,8 @@ class UnselectableElevatedButton extends StatelessWidget {
   final ElevatedButton child;
   @override
   Widget build(BuildContext context) {
-    return SelectionContainer.disabled(child: child);
+    return SelectionContainer.disabled(
+        child: MouseRegion(cursor: SystemMouseCursors.click, child: child));
   }
 }
 
@@ -18,7 +17,8 @@ class UnselectableTextButton extends StatelessWidget {
   final TextButton child;
   @override
   Widget build(BuildContext context) {
-    return SelectionContainer.disabled(child: child);
+    return SelectionContainer.disabled(
+        child: MouseRegion(cursor: SystemMouseCursors.click, child: child));
   }
 }
 
@@ -28,7 +28,8 @@ class UnselectableOutlinedButton extends StatelessWidget {
   final OutlinedButton child;
   @override
   Widget build(BuildContext context) {
-    return SelectionContainer.disabled(child: child);
+    return SelectionContainer.disabled(
+        child: MouseRegion(cursor: SystemMouseCursors.click, child: child));
   }
 }
 
@@ -38,6 +39,7 @@ class UnselectableToggleButton extends StatelessWidget {
   final ToggleButtons child;
   @override
   Widget build(BuildContext context) {
-    return SelectionContainer.disabled(child: child);
+    return SelectionContainer.disabled(
+        child: MouseRegion(cursor: SystemMouseCursors.click, child: child));
   }
 }

@@ -1,5 +1,5 @@
 import 'package:esp32_frontend/widgets/devices/components/build_exception.dart';
-import 'package:esp32_frontend/widgets/other/MyButton.dart';
+import 'package:esp32_frontend/widgets/other/my_button.dart';
 import 'package:flutter/material.dart';
 import 'package:esp32_frontend/util/string_extension.dart';
 

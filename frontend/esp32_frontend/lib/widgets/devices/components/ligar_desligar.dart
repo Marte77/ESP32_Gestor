@@ -12,14 +12,16 @@ class LigarDesligar extends StatefulWidget {
 class _LigarDesligarState extends State<LigarDesligar> {
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text("Ligar/desligar"),
-      leading: Switch(
-        value: widget.state,
-        onChanged: (value) {
-          widget.onChanged(value);
-        },
-      ),
-    );
+    return MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: ListTile(
+          title: const Text("Ligar/desligar"),
+          leading: Switch(
+            value: widget.state,
+            onChanged: (value) {
+              widget.onChanged(value);
+            },
+          ),
+        ));
   }
 }

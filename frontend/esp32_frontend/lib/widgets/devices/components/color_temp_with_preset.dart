@@ -1,4 +1,4 @@
-import 'package:esp32_frontend/widgets/other/MyButton.dart';
+import 'package:esp32_frontend/widgets/other/my_button.dart';
 import 'package:flutter/material.dart';
 
 class ColorTempWithPreset extends StatefulWidget {
@@ -46,20 +46,22 @@ class _ColorTempWithPresetState extends State<ColorTempWithPreset> {
     return Column(
       children: [
         Text("Temperatura: ${value.round()}"),
-        Slider(
-          value: value,
-          min: widget.min,
-          max: widget.max,
-          label: value.round().toString(),
-          onChanged: (val) {
-            setState(() {
-              value = val;
-            });
-          },
-          onChangeEnd: (val) {
-            widget.onChangeEnd(val);
-          },
-        ),
+        MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Slider(
+              value: value,
+              min: widget.min,
+              max: widget.max,
+              label: value.round().toString(),
+              onChanged: (val) {
+                setState(() {
+                  value = val;
+                });
+              },
+              onChangeEnd: (val) {
+                widget.onChangeEnd(val);
+              },
+            )),
         UnselectableToggleButton(
             child: ToggleButtons(
                 isSelected: widget.colorTempTemplatesBool,

@@ -27,20 +27,22 @@ class _LuminosidadeSliderState extends State<LuminosidadeSlider> {
     return Column(
       children: [
         Text("Luminosidade: ${brightness.round()}"),
-        Slider(
-          value: brightness,
-          min: widget.min,
-          max: widget.max,
-          label: brightness.round().toString(),
-          onChanged: (value) {
-            setState(() {
-              brightness = value;
-            });
-          },
-          onChangeEnd: (value) {
-            widget.onChangeEnd(value);
-          },
-        )
+        MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Slider(
+              value: brightness,
+              min: widget.min,
+              max: widget.max,
+              label: brightness.round().toString(),
+              onChanged: (value) {
+                setState(() {
+                  brightness = value;
+                });
+              },
+              onChangeEnd: (value) {
+                widget.onChangeEnd(value);
+              },
+            ))
       ],
     );
   }
