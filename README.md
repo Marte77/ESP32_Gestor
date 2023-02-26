@@ -1,4 +1,4 @@
-# ESP32_Gestor - ESP32 with LED Strip light
+# ESP32_Gestor - ESP32 with LED Strip light and ZigBee/MQTT Integration
 
 # arduino folder
 - contains the code of the ESP32. This code uses the 2 cores in the ESP32, where the main process takes care of the wifi communication, sending, every X seconds, the status of the device to the backend, and whenever it receives a request to change the mode, it kills the second process and restarts it. It's kinda buggy but I haven't felt like debugging it (it seems to not respond after multiple requests that were sent within a small interval of time, idk for sure)
