@@ -70,6 +70,8 @@ class _Esp32MainCardState extends State<Esp32MainCard> {
               ],
             ),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Slider(
                   value: brightnessVal.toDouble(),
