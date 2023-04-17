@@ -67,7 +67,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
   final formGlobalKey = GlobalKey<FormState>();
   String selectedMetodo = 'fadeEstatico';
   Color? selectedColor = Colors.pink;
-  int brightnessVal = 255;
+  int brightnessVal = 254;
   int waitTime = 50;
   bool isWaitButtonEnabled = true;
   Timer? timer;
@@ -115,7 +115,11 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
         selected = emptyesp;
       } else {
         selected = esps.first.value;
-        colorTheme.add(generateMaterialColor(color: selected!.cor));
+        if (selected!.cor.blue != 0 &&
+            selected!.cor.green != 0 &&
+            selected!.cor.red != 0) {
+          colorTheme.add(generateMaterialColor(color: selected!.cor));
+        }
       }
       setState(() {});
     }
@@ -137,16 +141,13 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               MaterialBanner(
-                content: const Text(
-                    "O valor Alpha na selecao de cores, define a cor Branca dos leds.\nCertos modos ignoram a cor e brilho selecionados"),
+                content: const Padding(
+                  padding: EdgeInsets.only(top: 10, bottom: 10),
+                  child: Text(
+                      "O valor Alpha na selecao de cores, define a cor Branca dos leds.\nCertos modos ignoram a cor e brilho selecionados"),
+                ),
                 leading: const CircleAvatar(child: Icon(Icons.warning)),
                 actions: [
-                  UnselectableTextButton(
-                    child: TextButton(
-                      child: const Text('             '),
-                      onPressed: () {},
-                    ),
-                  ),
                   UnselectableTextButton(
                     child: TextButton(
                       child: const Text('             '),
@@ -156,7 +157,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                 ],
               ),
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 15),
+                padding: EdgeInsets.only(bottom: 15),
                 child: Divider(),
               ),
               Form(
@@ -251,20 +252,27 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                         showDialog(
                           context: context,
                           builder: ((context) {
+                            var cor = selected == null
+                                ? selectedColor!
+                                : selected!.cor;
+                            if (cor.blue == 0 &&
+                                cor.red == 0 &&
+                                cor.green == 0) {
+                              cor = Colors.pinkAccent;
+                            }
                             return AlertDialog(
                               titlePadding: const EdgeInsets.all(0),
                               contentPadding: const EdgeInsets.all(0),
                               content: SingleChildScrollView(
                                 child: ColorPicker(
-                                  pickerColor: selected == null
-                                      ? selectedColor!
-                                      : selected!.cor,
+                                  pickerColor: cor,
                                   onColorChanged: ((value) {
                                     setState(() {
                                       selectedColor = value;
                                       selected?.cor = value;
                                       colorTheme.add(
-                                          generateMaterialColor(color: value));
+                                        generateMaterialColor(color: value),
+                                      );
                                     });
                                   }),
                                   portraitOnly: true,
@@ -289,6 +297,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                       child: const Text("Cor selecionada"),
                     ),
                   ),
+                  /*
                   TextFormField(
                     keyboardType: TextInputType.number,
                     initialValue: brightnessVal.toString(),
@@ -314,6 +323,23 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                         });
                       }
                     },
+                  ),
+                  */
+                  const Divider(),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 5),
+                    child: Text("Luminosidade:"),
+                  ),
+                  Slider(
+                    value: brightnessVal.toDouble(),
+                    onChanged: (val) {
+                      setState(() {
+                        brightnessVal = val.round();
+                      });
+                    },
+                    label: brightnessVal.toString(),
+                    min: 0,
+                    max: 254,
                   ),
                   const SizedBox(
                     height: 10,

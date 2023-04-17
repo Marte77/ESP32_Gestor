@@ -5,7 +5,7 @@
 #define PIN 23
 #define PIN_VCC 18
 #define PIN_GND 21
-#define NUMBER_OF_LEDS 40
+#define NUMBER_OF_LEDS 144//40
 #define MAX_BRIGHTNESS 255
 #define MEU_ROSA createCor(252,2,149)
 #define BRANCO createCor(0,0,0,255)
@@ -14,7 +14,7 @@
 #define AZUL_CEU createCor(2,0,244)
 #define AMARELO_ESTRELAS createCor(255,251,0)
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMBER_OF_LEDS, PIN, NEO_GRBW + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMBER_OF_LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
 typedef struct {
   uint8_t r;

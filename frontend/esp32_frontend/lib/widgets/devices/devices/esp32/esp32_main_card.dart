@@ -12,6 +12,7 @@ class Esp32MainCard extends StatefulWidget {
 
 class _Esp32MainCardState extends State<Esp32MainCard> {
   String modoAnterior = "";
+  int brightnessVal = 254;
   @override
   void initState() {
     modoAnterior = widget.esp32.modo;
@@ -46,33 +47,66 @@ class _Esp32MainCardState extends State<Esp32MainCard> {
     return Card(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-        child: Column(children: [
-          Text(widget.esp32.ipaddress),
-          Text(widget.esp32.modo),
-          Row(children: [
-            const Text("Cor:         "),
-            Container(
-              color: widget.esp32.cor,
-              width: 30,
-              height: 30,
+        child: Column(
+          children: [
+            Text(widget.esp32.ipaddress),
+            Text(widget.esp32.modo),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Cor:         "),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    color: widget.esp32.cor,
+                  ),
+                ),
+              ],
             ),
-          ]),
-          UnselectableElevatedButton(
-            child: ElevatedButton(
-              onPressed: () => desligar(),
-              child: const Text("Desligar"),
+            Row(
+              children: [
+                Slider(
+                  value: brightnessVal.toDouble(),
+                  onChanged: (val) {
+                    setState(() {
+                      brightnessVal = val.round();
+                    });
+                  },
+                  label: brightnessVal.toString(),
+                  min: 0,
+                  max: 254,
+                ),
+                UnselectableElevatedButton(
+                  child: ElevatedButton(
+                    onPressed: () => {},
+                    child: const Text("Enviar Lumin."),
+                  ),
+                )
+              ],
             ),
-          ),
-          UnselectableElevatedButton(
-            child: ElevatedButton(
-                onPressed: () => ligar(modoAnterior),
-                child: Text("Voltar ao modo: $modoAnterior")),
-          ),
-          UnselectableElevatedButton(
+            UnselectableElevatedButton(
               child: ElevatedButton(
-                  onPressed: () => ligar("corEstatica"),
-                  child: const Text("Ligar"))),
-        ]),
+                onPressed: () => desligar(),
+                child: const Text("Desligar"),
+              ),
+            ),
+            UnselectableElevatedButton(
+              child: ElevatedButton(
+                  onPressed: () => ligar(modoAnterior),
+                  child: Text("Voltar ao modo: $modoAnterior")),
+            ),
+            UnselectableElevatedButton(
+                child: ElevatedButton(
+                    onPressed: () => ligar("corEstatica"),
+                    child: const Text("Ligar"))),
+          ],
+        ),
       ),
     );
   }

@@ -20,6 +20,7 @@ class ZigBeeDevice extends StatefulWidget {
   final MqttClient? mqttClient;
   final Map<String, dynamic> device;
   static const String nullComponent = "NULO!_";
+
   /// param Y normalmente é a brightness
   // ignore: non_constant_identifier_names
   static Color convert_xyY_to_XYZ(double x, double y, double Y) {
@@ -115,6 +116,8 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
           friendlyName: friendlyName,
           state: dataReceivedOnSubscribe);
     }
+    addNumbers(int x, int y) => x + y;
+    final a = addNumbers(1, 1);
 
     if (lista != null) {
       return lista;
@@ -135,7 +138,14 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
         child: SingleChildScrollView(
             controller: scrollController,
             child: Column(children: [
-              Padding(padding: const EdgeInsets.only(top:10, bottom: 15), child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),),
+              Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 15),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+              ),
               Text(description),
               Text(model),
               Text(vendor),
