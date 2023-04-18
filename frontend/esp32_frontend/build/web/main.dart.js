@@ -42985,7 +42985,7 @@ s.toString
 s.f.o2(B.mJ)},
 $S:11}
 A.p6.prototype={
-af(){return new A.U3(A.a([A.aIt(B.yK,A.aIK("","","",B.d2,50),t.HW)],t.D0),A.y(t.N,t.a),A.a(["fadeEstatico","corEstatica","preencherUmAUm","preencherUmAUmBounce","arcoIris","arcoIrisCycle","cintilarEstrelas","turnOff"],t.s),new A.bh(null,t.am),B.d2,B.i)}}
+af(){return new A.U3(A.a([A.aIt(B.yK,A.aIK("","","",B.d2,50),t.HW)],t.D0),A.y(t.N,t.a),A.a(["fadeEstatico","corEstatica","preencherUmAUm","preencherUmAUmBounce","arcoIris","arcoIrisCycle","cintilarEstrelas","turnOff","fire"],t.s),new A.bh(null,t.am),B.d2,B.i)}}
 A.jd.prototype={
 k(a,b){if(b==null)return!1
 return b instanceof A.jd&&b.a===this.a},
@@ -43047,8 +43047,8 @@ r=A.jQ(A.a([new A.rE(1,B.oJ,s,k),B.N0,new A.PQ(new A.Mf(r,k,k,k,k,B.n,k,!1,k,B.R
 s=l.f
 s=s==null?l.y:s.c
 q=t.b7
-p=J.azg(8,q)
-for(o=l.w,n=0;n<8;++n){m=o[n]
+p=J.azg(9,q)
+for(o=l.w,n=0;n<9;++n){m=o[n]
 p[n]=new A.eI(m,A.dt(m,k,k,k,k,k,k),B.c1,k,q)}s=A.a37(p,new A.anR(l),s,t.N)
 q=A.a7R(A.aB1(new A.anS(l),l.ay),k,B.S0)
 o=l.f
@@ -92446,4 +92446,3 @@ a(b.target)}for(var r=0;r<s.length;++r)s[r].addEventListener("load",onLoad,false
 var s=A.atw
 if(typeof dartMainRunner==="function")dartMainRunner(s,[])
 else s([])})})()
-//# sourceMappingURL=main.dart.js.map

@@ -63,6 +63,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
     'arcoIrisCycle',
     'cintilarEstrelas',
     'turnOff',
+    'fire'
   ];
   final formGlobalKey = GlobalKey<FormState>();
   String selectedMetodo = 'fadeEstatico';

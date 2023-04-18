@@ -61,11 +61,12 @@ typedef enum{
   EarcoIris,
   EarcoIrisCycle,
   EturnOff,
-  EcintilarEstrelas
+  EcintilarEstrelas,
+  Efire
 }modo;
 
 uint8_t wait = 50;
-modo modoLED = EcorEstatica;
+modo modoLED = Efire;
 COR cor = BRANCO;
 
 IPAddress ip;
@@ -118,7 +119,7 @@ String corToString(COR c){
   return s;
 }
 String modoToString(){
-switch(modoLED){
+  switch(modoLED){
     case EfadeEstatico:
       return "fadeEstatico";
     case EcorEstatica:
@@ -135,6 +136,8 @@ switch(modoLED){
       return "desligarLeds";
     case EcintilarEstrelas:
       return "cintilarEstrelas";
+    case Efire:
+      return "fire";
   }
 }
 void setup() {
@@ -173,6 +176,7 @@ inline void createLEDThread(){
   );
 }
 long int currentTime = millis();
+int brightness = 255;
 void loop(){
   WiFiClient client = server.available();
   if(client){
@@ -212,6 +216,7 @@ inline void parseRequest(WiFiClient client){
           cor = w == 0 ? createCor(r,g,b) : createCor(r,g,b,w);
           if(br > 0){
             cor = corWithBrightness(cor,br);
+            brightness = br;
           }
           bool res = compararModos(mode);
           if(res)
@@ -286,6 +291,8 @@ inline void selectMode(){
     case EcintilarEstrelas:
       cintilarEstrelas();
       break;
+    case Efire:
+      Fire();
   }
 }
 inline bool compararModos(String modo){
@@ -311,6 +318,8 @@ inline bool compararModos(String modo){
     modoLED = EturnOff;
   }else if(modo == "cintilarestrelas"){
     modoLED = EcintilarEstrelas;
+  }else if(modo == "fire"){
+    modoLED = Efire;
   }
   else{
     isCorrect = false;
@@ -326,12 +335,12 @@ void cintilarEstrelas(){
   int array[10];
   for(int i = 0; i<10; i++){
     array[i] = random(NUMBER_OF_LEDS);
-    strip.setPixelColor(array[i],corToUInt(AMARELO_ESTRELAS));
+    strip.setPixelColor(array[i],corToUInt(corWithBrightness(AMARELO_ESTRELAS, brightness)));
     strip.show();
     delay(wait*3);    
   }
   for(int i = 0; i<10; i++){
-    strip.setPixelColor(array[i],corToUInt(AZUL_CEU));
+    strip.setPixelColor(array[i],corToUInt(corWithBrightness(AZUL_CEU, brightness)));
     strip.show();
     delay(wait*3);    
   }
@@ -447,6 +456,61 @@ void arcoIrisCycle() {
     delay(wait);
   }
 }
+void Fire() {
+  int Cooling = 55;
+  int Sparking = 120;
+  int SpeedDelay = 45;
+  static byte heat[NUMBER_OF_LEDS];
+  int cooldown;
+  
+  // Step 1.  Cool down every cell a little
+  for( int i = 0; i < NUMBER_OF_LEDS; i++) {
+    cooldown = random(0, ((Cooling * 10) / NUMBER_OF_LEDS) + 2);
+    
+    if(cooldown>heat[i]) {
+      heat[i]=0;
+    } else {
+      heat[i]=heat[i]-cooldown;
+    }
+  }
+  
+  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+  for( int k= NUMBER_OF_LEDS - 1; k >= 2; k--) {
+    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
+  }
+    
+  // Step 3.  Randomly ignite new 'sparks' near the bottom
+  if( random(255) < Sparking ) {
+    int y = random(7);
+    heat[y] = heat[y] + random(160,255);
+    //heat[y] = random(160,255);
+  }
+
+  // Step 4.  Convert heat to LED colors
+  for( int j = 0; j < NUMBER_OF_LEDS; j++) {
+    setPixelHeatColor(j, heat[j] );
+  }
+
+  strip.show();
+  delay(SpeedDelay);
+}
+void setPixelHeatColor (int Pixel, byte temperature) {
+  // Scale 'heat' down from 0-255 to 0-191
+  byte t192 = round((temperature/255.0)*191);
+ 
+  // calculate ramp up from
+  byte heatramp = t192 & 0x3F; // 0..63
+  heatramp <<= 2; // scale up to 0..252
+ 
+  // figure out which third of the spectrum we're in:
+  if( t192 > 0x80) {                     // hottest
+    strip.setPixelColor(Pixel, corToUInt(corWithBrightness(createCor(255, 255, heatramp), brightness)));
+  } else if( t192 > 0x40 ) {             // middle
+    strip.setPixelColor(Pixel, corToUInt(corWithBrightness(createCor(255, heatramp, 0), brightness)));
+  } else {                               // coolest
+    strip.setPixelColor(Pixel, corToUInt(corWithBrightness(createCor(heatramp, 0, 0), brightness)));
+  }
+}
 
 
 // Input a value 0 to 255 to get a color value.
@@ -454,12 +518,13 @@ void arcoIrisCycle() {
 uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
   if(WheelPos < 85) {
-    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+    return corToUInt(corWithBrightness(createCor(255 - WheelPos * 3, 0, WheelPos * 3),brightness));//strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
   }
   if(WheelPos < 170) {
     WheelPos -= 85;
-    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+    return corToUInt(corWithBrightness(createCor(0, WheelPos * 3, 255 - WheelPos * 3),brightness));//return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
   }
   WheelPos -= 170;
-  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  return corToUInt(corWithBrightness(createCor(WheelPos * 3, 255 - WheelPos * 3, 0),brightness));
+  //return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
