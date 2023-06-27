@@ -9,6 +9,7 @@ const env = require('dotenv').config()
 app.use(cors())
 try {
     db.exec("create table esp32(ipaddress text primary key, timestamp text, cor text, modo text, waittime integer)");
+    db.exec("create table zigbee_preserve_status(ieee text primary key, name text)")
 } catch (err) {
     if(!err.toString().indexOf("already exists") > 0){
         throw err
@@ -57,6 +58,66 @@ app.get('/getall', function(req,res){
     res.json({dados:rows})
 })
 
+app.post('/guardarestado', function (req,res){
+    if(!req.body.ieee) {
+        res.status(400).send({err:"body nao tem ieee address"})
+        return
+    }
+    if(!req.body.name) {
+        res.status(400).send({err:"body nao tem name address"})
+        return
+    }
+    let sql = 'select * from zigbee_preserve_status where ieee = ?'
+    let row = db.prepare(sql).get(req.body.ieee)
+    let data = {
+        ieee: req.body.ieee,
+        name: req.body.name
+    }
+    if(!row){
+        //nao existe, vou criar
+        try {
+            let novo = db.prepare('insert into zigbee_preserve_status(ieee, name) values (@ieee, @name)').run(data)
+            console.log(novo)
+            res.status(200).send('top')
+        } catch (error) {
+            console.log(error)
+            res.status(400).send("erro a inserir")
+        }
+        return
+    }
+    res.status(300).send({err:"already saved state"})
+})
+
+app.post('/naoguardarestado', function (req,res){
+    if(!req.body.ieee) {
+        res.status(400).send({err:"body nao tem ieee address"})
+        return
+    }
+    if(!req.body.name) {
+        res.status(400).send({err:"body nao tem name address"})
+        return
+    }
+    let sql = 'select * from zigbee_preserve_status where ieee = ?'
+    let row = db.prepare(sql).get(req.body.ieee)
+    let data = {
+        ieee: req.body.ieee,
+        name: req.body.name
+    }
+    if(row){
+        //existe, vou apagar
+        try {
+            let novo = db.prepare('delete from zigbee_preserve_status where ieee = @ieee').run(data)
+            console.log(novo)
+            res.status(200).send('top')
+        } catch (error) {
+            console.log(error)
+            res.status(400).send("erro a inserir")
+        }
+        return
+    }
+    res.status(400).send({err:"doesnt exist"})
+})
+
 setInterval(function(){
     if(isRegistering) return
     let sql = 'select * from esp32'
@@ -76,6 +137,8 @@ setInterval(function(){
     })
     removertodos(coisosARemover)
 },process.env.LOOP_SECONDS)
+
+setInterval()
 
 app.listen(port, () => {
     console.log("running");

@@ -65,6 +65,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
     'turnOff',
     'fire'
   ];
+  RGBMode? rgbMode = RGBMode.grbw;
   final formGlobalKey = GlobalKey<FormState>();
   String selectedMetodo = 'fadeEstatico';
   Color? selectedColor = Colors.pink;
@@ -141,164 +142,53 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              MaterialBanner(
-                content: const Padding(
-                  padding: EdgeInsets.only(top: 10, bottom: 10),
-                  child: Text(
-                      "O valor Alpha na selecao de cores, define a cor Branca dos leds.\nCertos modos ignoram a cor e brilho selecionados"),
-                ),
-                leading: const CircleAvatar(child: Icon(Icons.warning)),
-                actions: [
-                  UnselectableTextButton(
-                    child: TextButton(
-                      child: const Text('             '),
-                      onPressed: () {},
-                    ),
-                  ),
-                ],
-              ),
+              bannerComponent(context),
               const Padding(
                 padding: EdgeInsets.only(bottom: 15),
                 child: Divider(),
               ),
-              Form(
-                key: formGlobalKey,
-                child: Column(children: [
-                  esps.isNotEmpty
-                      ? DropdownButton(
-                          value: selected,
-                          items: esps,
-                          onChanged: (esp) {
-                            setState(() {
-                              selected = esp as Esp32;
-                            });
-                          })
-                      : const Text(''),
-                  Row(
-                    children: [
-                      Flexible(
-                        child: TextFormField(
-                          keyboardType: TextInputType.number,
-                          initialValue: selected == null
-                              ? waitTime.toString()
-                              : selected!.waitTime.toString(),
-                          onChanged: (value) {
-                            var aux = int.tryParse(value);
-                            if (aux != null && aux > 0) {
-                              setState(() {
-                                waitTime = aux;
-                                selected?.waitTime = aux;
-                                isWaitButtonEnabled = true;
-                              });
-                            } else {
-                              setState(() {
-                                isWaitButtonEnabled = false;
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      UnselectableOutlinedButton(
-                          child: OutlinedButton(
-                              onPressed: isWaitButtonEnabled
-                                  ? () {
-                                      var url = Uri.http(selected!.ipaddress,
-                                          "wait/$waitTime");
-                                      http
-                                          .get(url)
-                                          .then((value) => null)
-                                          .onError((error, stackTrace) {
-                                        return null;
-                                      });
-                                    }
-                                  : null,
-                              child: const Text('Definir tempo de espera'))),
-                    ],
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    child: Divider(),
-                  ),
-                  DropdownButton(
-                    value: selected == null ? selectedMetodo : selected!.modo,
-                    items: List.generate(
-                        metodos.length,
-                        (index) => DropdownMenuItem(
-                              value: metodos[index],
-                              child: Text(metodos[index]),
-                            )),
-                    onChanged: (String? val) {
-                      if (val != null) {
-                        setState(() {
-                          selectedMetodo = val;
-                          selected?.modo = val;
-                        });
-                      }
-                    },
-                  ),
-                  ListTile(
-                      title: const Text("Usar apenas branco"),
-                      leading: Switch(
-                        value: isFullWhite,
-                        onChanged: (value) => setState(() {
-                          isFullWhite = value;
-                        }),
-                      )),
-                  UnselectableElevatedButton(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: ((context) {
-                            var cor = selected == null
-                                ? selectedColor!
-                                : selected!.cor;
-                            if (cor.blue == 0 &&
-                                cor.red == 0 &&
-                                cor.green == 0) {
-                              cor = Colors.pinkAccent;
-                            }
-                            return AlertDialog(
-                              titlePadding: const EdgeInsets.all(0),
-                              contentPadding: const EdgeInsets.all(0),
-                              content: SingleChildScrollView(
-                                child: ColorPicker(
-                                  pickerColor: cor,
-                                  onColorChanged: ((value) {
-                                    setState(() {
-                                      selectedColor = value;
-                                      selected?.cor = value;
-                                      colorTheme.add(
-                                        generateMaterialColor(color: value),
-                                      );
-                                    });
-                                  }),
-                                  portraitOnly: true,
-                                ),
-                              ),
-                              actions: [
-                                UnselectableTextButton(
-                                    child: TextButton(
-                                  child: const Text("Fechar"),
-                                  onPressed: () => Navigator.of(context).pop(),
-                                )),
-                              ],
-                            );
-                          }),
-                        );
-                      },
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                              selected == null
-                                  ? selectedColor
-                                  : selected!.cor)),
-                      child: const Text("Cor selecionada"),
-                    ),
-                  ),
-                  /*
+              formComponent(context)
+            ],
+          ),
+        )),
+      )),
+    );
+  }
+
+  Widget bannerComponent(BuildContext context) {
+    return MaterialBanner(
+      content: const Padding(
+        padding: EdgeInsets.only(top: 10, bottom: 10),
+        child: Text(
+            "O valor Alpha na selecao de cores, define a cor Branca dos leds.\nCertos modos ignoram a cor e brilho selecionados"),
+      ),
+      leading: const CircleAvatar(child: Icon(Icons.warning)),
+      actions: [
+        UnselectableTextButton(
+          child: TextButton(
+            child: const Text('             '),
+            onPressed: () {},
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget formComponent(BuildContext context) {
+    return Form(
+      key: formGlobalKey,
+      child: Column(children: [
+        selectEspComponent(context),
+        waitTimeComponent(context),
+        selectRBGModeComponent(context),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 15),
+          child: Divider(),
+        ),
+        selectLightModeComponent(context),
+        selectWhetherToUseWhiteComponent(context),
+        selectLEDColorComponent(context),
+        /*
                   TextFormField(
                     keyboardType: TextInputType.number,
                     initialValue: brightnessVal.toString(),
@@ -326,67 +216,272 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                     },
                   ),
                   */
-                  const Divider(),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 5),
-                    child: Text("Luminosidade:"),
-                  ),
-                  Slider(
-                    value: brightnessVal.toDouble(),
-                    onChanged: (val) {
+        const Divider(),
+        selectLEDBrightnessComponent(context),
+        const SizedBox(
+          height: 10,
+        ),
+        sendFormButtonComponent(context),
+      ]),
+    );
+  }
+
+  Widget selectRBGModeComponent(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        DropdownButton(
+          items: List.generate(
+              RGBMode.values.length,
+              (index) => DropdownMenuItem(
+                  value: RGBMode.values.elementAt(index),
+                  child: Text(RGBMode.values.elementAt(index).toString()))),
+          value: rgbMode,
+          onChanged: (rgb) {
+            if (rgb != null) {
+              setState(() {
+                rgbMode = rgb as RGBMode;
+              });
+            }
+          },
+        ),
+        const SizedBox(
+          width: 50,
+        ),
+        UnselectableElevatedButton(
+            child: ElevatedButton(
+          child: Text("Enviar novo Modo"),
+          onPressed: () {
+            var url = Uri.http(
+                selected!.ipaddress, "changeLED/${rgbMode.toString()}");
+            http.get(url).then((value) => null).onError((error, stackTrace) {
+              return null;
+            });
+          },
+        ))
+      ],
+    );
+  }
+
+  Widget selectEspComponent(BuildContext context) {
+    return esps.isNotEmpty
+        ? DropdownButton(
+            value: selected,
+            items: esps,
+            onChanged: (esp) {
+              setState(() {
+                selected = esp as Esp32;
+              });
+            })
+        : const Text('');
+  }
+
+  Widget selectLEDColorComponent(BuildContext context) {
+    return UnselectableElevatedButton(
+      child: ElevatedButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: ((context) {
+              var cor = selected == null ? selectedColor! : selected!.cor;
+              if (cor.blue == 0 && cor.red == 0 && cor.green == 0) {
+                cor = Colors.pinkAccent;
+              }
+              return AlertDialog(
+                titlePadding: const EdgeInsets.all(0),
+                contentPadding: const EdgeInsets.all(0),
+                content: SingleChildScrollView(
+                  child: ColorPicker(
+                    pickerColor: cor,
+                    onColorChanged: ((value) {
                       setState(() {
-                        brightnessVal = val.round();
-                      });
-                    },
-                    label: brightnessVal.toString(),
-                    min: 0,
-                    max: 254,
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  UnselectableElevatedButton(
-                      child: ElevatedButton(
-                    onPressed: (() async {
-                      if (!formGlobalKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Valor do brilho incorreto")));
-                        return;
-                      }
-                      if (selected == null ||
-                          selectedColor == null ||
-                          selected!.ipaddress.isEmpty ||
-                          selectedMetodo.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text("Sem as informacoes todas")));
-                        return;
-                      }
-                      if (isFullWhite) {
-                        selectedColor = selectedColor!
-                            .withRed(0)
-                            .withBlue(0)
-                            .withGreen(0)
-                            .withAlpha(0); //alpha a 0 porque inverte
-                      }
-                      var url = Uri.http(selected!.ipaddress,
-                          "mode/$selectedMetodo?r=${selectedColor!.red},g=${selectedColor!.green},b=${selectedColor!.blue},w=${Esp32.map(selectedColor!.alpha.toDouble(), 0, 255, 255, 0)},br=$brightnessVal");
-                      http
-                          .get(url)
-                          .then((value) => null)
-                          .onError((error, stackTrace) {
-                        return null;
+                        selectedColor = value;
+                        selected?.cor = value;
+                        colorTheme.add(
+                          generateMaterialColor(color: value),
+                        );
                       });
                     }),
-                    child: const Text("Enviar"),
+                    portraitOnly: true,
+                  ),
+                ),
+                actions: [
+                  UnselectableTextButton(
+                      child: TextButton(
+                    child: const Text("Fechar"),
+                    onPressed: () => Navigator.of(context).pop(),
                   )),
-                ]),
-              )
-            ],
-          ),
-        )),
-      )),
+                ],
+              );
+            }),
+          );
+        },
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(
+                selected == null ? selectedColor : selected!.cor)),
+        child: const Text("Cor selecionada"),
+      ),
     );
+  }
+
+  Widget sendFormButtonComponent(BuildContext context) {
+    return UnselectableElevatedButton(
+        child: ElevatedButton(
+      onPressed: (() async {
+        if (!formGlobalKey.currentState!.validate()) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Valor do brilho incorreto")));
+          return;
+        }
+        if (selected == null ||
+            selectedColor == null ||
+            selected!.ipaddress.isEmpty ||
+            selectedMetodo.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Sem as informacoes todas")));
+          return;
+        }
+        if (isFullWhite) {
+          selectedColor = selectedColor!
+              .withRed(0)
+              .withBlue(0)
+              .withGreen(0)
+              .withAlpha(0); //alpha a 0 porque inverte
+        }
+        var url = Uri.http(selected!.ipaddress,
+            "mode/$selectedMetodo?r=${selectedColor!.red},g=${selectedColor!.green},b=${selectedColor!.blue},w=${Esp32.map(selectedColor!.alpha.toDouble(), 0, 255, 255, 0)},br=$brightnessVal");
+        http.get(url).then((value) => null).onError((error, stackTrace) {
+          return null;
+        });
+      }),
+      child: const Text("Enviar"),
+    ));
+  }
+
+  Widget selectLEDBrightnessComponent(BuildContext context) {
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 5),
+          child: Text("Luminosidade:"),
+        ),
+        Slider(
+          value: brightnessVal.toDouble(),
+          onChanged: (val) {
+            setState(() {
+              brightnessVal = val.round();
+            });
+          },
+          label: brightnessVal.toString(),
+          min: 0,
+          max: 254,
+        )
+      ],
+    );
+  }
+
+  Widget selectWhetherToUseWhiteComponent(BuildContext context) {
+    return ListTile(
+        title: const Text("Usar apenas branco"),
+        leading: Switch(
+          value: isFullWhite,
+          onChanged: (value) => setState(() {
+            isFullWhite = value;
+          }),
+        ));
+  }
+
+  Widget selectLightModeComponent(BuildContext context) {
+    return DropdownButton(
+      value: selected == null || selected!.modo.isEmpty
+          ? selectedMetodo
+          : selected!.modo,
+      items: List.generate(
+          metodos.length,
+          (index) => DropdownMenuItem(
+                value: metodos[index],
+                child: Text(metodos[index]),
+              )),
+      onChanged: (String? val) {
+        if (val != null) {
+          setState(() {
+            selectedMetodo = val;
+            selected?.modo = val;
+          });
+        }
+      },
+    );
+  }
+
+  Widget waitTimeComponent(BuildContext context) {
+    return Row(
+      children: [
+        Flexible(
+          child: TextFormField(
+            keyboardType: TextInputType.number,
+            initialValue: selected == null
+                ? waitTime.toString()
+                : selected!.waitTime.toString(),
+            onChanged: (value) {
+              var aux = int.tryParse(value);
+              if (aux != null && aux > 0) {
+                setState(() {
+                  waitTime = aux;
+                  selected?.waitTime = aux;
+                  isWaitButtonEnabled = true;
+                });
+              } else {
+                setState(() {
+                  isWaitButtonEnabled = false;
+                });
+              }
+            },
+          ),
+        ),
+        const SizedBox(
+          width: 20,
+        ),
+        UnselectableOutlinedButton(
+            child: OutlinedButton(
+                onPressed: isWaitButtonEnabled
+                    ? () {
+                        var url =
+                            Uri.http(selected!.ipaddress, "wait/$waitTime");
+                        http
+                            .get(url)
+                            .then((value) => null)
+                            .onError((error, stackTrace) {
+                          return null;
+                        });
+                      }
+                    : null,
+                child: const Text('Definir tempo de espera'))),
+      ],
+    );
+  }
+}
+
+enum RGBMode {
+  grb,
+  grbw;
+
+  @override
+  String toString() {
+    switch (this) {
+      case RGBMode.grb:
+        return "RGB";
+      case RGBMode.grbw:
+        return "RGBW";
+    }
+  }
+
+  RGBMode fromString(String s) {
+    switch (s) {
+      case "RGB":
+        return RGBMode.grb;
+      case "RGBW":
+        return RGBMode.grbw;
+    }
+    throw Exception("Not valid String");
   }
 }

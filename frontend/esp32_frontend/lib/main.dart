@@ -147,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void parseDevices(List<MqttReceivedMessage<MqttMessage>> data) {
+    listaDevicesMqtt.clear();
     if (data.length == 1 && data.first.topic == zigbee2mqttTopic) {
       //vai ter todos os devices da rede
       String conteudo = MqttPublishPayload.bytesToStringAsString(

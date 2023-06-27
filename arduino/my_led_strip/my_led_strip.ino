@@ -66,7 +66,7 @@ typedef enum{
 }modo;
 
 uint8_t wait = 50;
-modo modoLED = Efire;
+modo modoLED = EturnOff;
 COR cor = BRANCO;
 
 IPAddress ip;
@@ -213,6 +213,7 @@ inline void parseRequest(WiFiClient client){
           int w = requestPath.substring(requestPath.indexOf("w=")+2,requestPath.indexOf("br=")).toInt();
           int br = requestPath.substring(requestPath.indexOf("br=")+3).toInt();
           currentLine = "Mode: " + mode + "\nCores: (" + r + "," + g + "," + b + "," + w + ") with brightness= " + br;
+          Serial.println("client called /mode with \n\t" + currentLine);
           cor = w == 0 ? createCor(r,g,b) : createCor(r,g,b,w);
           if(br > 0){
             cor = corWithBrightness(cor,br);
@@ -227,6 +228,7 @@ inline void parseRequest(WiFiClient client){
           }
         }else if(requestPath.indexOf("/wait/")>=0){
           String aux = requestPath.substring(requestPath.indexOf("/wait/")+6);
+          Serial.println("client called /wait");
           aux = aux.substring(0,aux.indexOf(" "));
           int waitNovo = aux.toInt();
           if(waitNovo <= 0){
@@ -235,7 +237,17 @@ inline void parseRequest(WiFiClient client){
           wait = waitNovo;          
           response = "HTTP/1.1 200 OK";
           currentLine = "Wait atualizado";
-        }else{
+        }else if(requestPath.indexOf("/changeLED/")>=0){
+          String modo = requestPath.substring(requestPath.indexOf("/changeLED/")+11);
+          Serial.println("client called /changeLED");
+          modo = modo.substring(0,modo.indexOf(" "));
+          modo.toUpperCase();
+          if(modo.equals("RGB")) strip.updateType(NEO_GRB);
+          else if (modo.equals("RGBW")) strip.updateType(NEO_GRBW);
+          response = "HTTP/1.1 200 OK";
+          currentLine = "RGB LED Mode atualizado";
+        }      
+        else{
           response = "HTTP/1.1 404 Not Found";
           currentLine ="\ncaminho nao existe";
         }
