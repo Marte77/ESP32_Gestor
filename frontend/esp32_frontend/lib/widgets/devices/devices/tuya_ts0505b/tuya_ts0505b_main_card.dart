@@ -61,8 +61,8 @@ class _TuyaTS0505bMainCardState extends State<TuyaTS0505bMainCard>
   void setData() {
     state = payloadData["state"] == "ON" ? true : false;
     brightness = (payloadData["brightness"] as int).toDouble();
-    selectedColor = ZigBeeDevice.convert_xyY_to_XYZ(
-        payloadData["color"]["x"], payloadData["color"]["y"], 100);
+    selectedColor = payloadData["color"] != null ? ZigBeeDevice.convert_xyY_to_XYZ(
+        payloadData["color"]["x"], payloadData["color"]["y"], 100) : Colors.pink;
   }
 
   @override

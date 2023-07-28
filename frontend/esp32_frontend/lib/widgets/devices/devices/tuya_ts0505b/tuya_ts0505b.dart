@@ -66,12 +66,11 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
   void setData() {
     state = payloadData["state"] == "ON" ? true : false;
     brightness = (payloadData["brightness"] as int).toDouble();
-    selectedColor = ZigBeeDevice.convert_xyY_to_XYZ(
-        payloadData["color"]["x"],
-        payloadData["color"]["y"],
-        100);
+    selectedColor = payloadData["color"] != null ? ZigBeeDevice.convert_xyY_to_XYZ(
+        payloadData["color"]["x"], payloadData["color"]["y"], 100) : Colors.pink;
     color_temp = (payloadData["color_temp"] as int).toDouble();
-    powerOnBehaviour = payloadData["power_on_behavior"] ?? ZigBeeDevice.nullComponent;
+    powerOnBehaviour =
+        payloadData["power_on_behavior"] ?? ZigBeeDevice.nullComponent;
   }
 
   @override
@@ -223,23 +222,23 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
             }
           }),
       const Divider(),
-      if(powerOnBehaviour != ZigBeeDevice.nullComponent)
-      PowerOnBehaviourToggle(
-        toggleList: const [
-          Text("Off"),
-          Text("On"),
-          Text("Toggle"),
-          Text("Previous"),
-        ],
-        alreadySelected: powerOnBehaviour,
-        onPressed: ((value) {
-          setState(() {
-            powerOnBehaviour = value;
-            payloadData["power_on_behaviour"] = value;
-          });
-          publishChanges({"power_on_behavior": value.toLowerCase()});
-        }),
-      )
+      if (powerOnBehaviour != ZigBeeDevice.nullComponent)
+        PowerOnBehaviourToggle(
+          toggleList: const [
+            Text("Off"),
+            Text("On"),
+            Text("Toggle"),
+            Text("Previous"),
+          ],
+          alreadySelected: powerOnBehaviour,
+          onPressed: ((value) {
+            setState(() {
+              powerOnBehaviour = value;
+              payloadData["power_on_behaviour"] = value;
+            });
+            publishChanges({"power_on_behavior": value.toLowerCase()});
+          }),
+        )
     ];
   }
 
