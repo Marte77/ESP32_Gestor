@@ -138,8 +138,6 @@ setInterval(function(){
     removertodos(coisosARemover)
 },process.env.LOOP_SECONDS)
 
-setInterval()
-
 app.listen(port, () => {
     console.log("running");
 })
