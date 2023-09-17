@@ -65,10 +65,10 @@ class _TuyaTS0505BState extends State<TuyaTS0505B>
 
   void setData() {
     state = payloadData["state"] == "ON" ? true : false;
-    brightness = (payloadData["brightness"] as int).toDouble();
+    brightness = payloadData["brightness"] != null ? (payloadData["brightness"] as int).toDouble() : 0;
     selectedColor = payloadData["color"] != null ? ZigBeeDevice.convert_xyY_to_XYZ(
         payloadData["color"]["x"], payloadData["color"]["y"], 100) : Colors.pink;
-    color_temp = (payloadData["color_temp"] as int).toDouble();
+    color_temp = payloadData["color_temp"] != null ? (payloadData["color_temp"] as int).toDouble() : 0;
     powerOnBehaviour =
         payloadData["power_on_behavior"] ?? ZigBeeDevice.nullComponent;
   }
