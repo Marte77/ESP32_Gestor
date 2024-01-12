@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:esp32_frontend/widgets/devices/devices/hue_929001821618/hue_929001821618.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
@@ -112,6 +113,13 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
     if (model == "TS0505B") {
       //ligar e desligar
       lista = TuyaTS0505B(
+          mqttClient: mqttClient,
+          friendlyName: friendlyName,
+          state: dataReceivedOnSubscribe);
+    }
+    if (model == "929001821618") {
+      //ligar e desligar
+      lista = Hue929001821618(
           mqttClient: mqttClient,
           friendlyName: friendlyName,
           state: dataReceivedOnSubscribe);

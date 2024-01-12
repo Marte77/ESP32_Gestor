@@ -4,6 +4,7 @@ import 'package:esp32_frontend/pages/esp32.dart';
 import 'package:esp32_frontend/pages/zigbee.dart';
 import 'package:esp32_frontend/util/support_web_mobile/mqtt_finder.dart';
 import 'package:esp32_frontend/widgets/devices/devices/esp32/esp32_main_card.dart';
+import 'package:esp32_frontend/widgets/devices/devices/hue_929001821618/hue_929001821618_main_card.dart';
 import 'package:esp32_frontend/widgets/devices/devices/tuya_ts0505b/tuya_ts0505b_main_card.dart';
 import 'package:esp32_frontend/widgets/other/my_button.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
@@ -201,6 +202,13 @@ class _MyHomePageState extends State<MyHomePage> {
     for (var zig in listaDevicesMqtt) {
       if (zig["model"] == "TS0505B") {
         cards.add(TuyaTS0505bMainCard(
+            mqttClient: mqttClient,
+            friendlyName: zig["friendly_name"],
+            state: zig));
+      }
+      if (zig["model"] == "929001821618") {
+        //ligar e desligar
+        cards.add(Hue929001821618MainCard(
             mqttClient: mqttClient,
             friendlyName: zig["friendly_name"],
             state: zig));
