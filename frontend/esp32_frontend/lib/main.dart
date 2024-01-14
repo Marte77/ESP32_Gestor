@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'dart:convert';
 import 'package:esp32_frontend/pages/esp32.dart';
+import 'package:esp32_frontend/pages/settings.dart';
 import 'package:esp32_frontend/pages/zigbee.dart';
 import 'package:esp32_frontend/util/support_web_mobile/mqtt_finder.dart';
 import 'package:esp32_frontend/widgets/devices/devices/abstract_device_main_card.dart';
@@ -11,11 +11,9 @@ import 'package:esp32_frontend/widgets/other/my_button.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:material_color_generator/material_color_generator.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:http/http.dart' as http;
 
-//StreamController<MaterialColor> colorTheme = StreamController();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
@@ -23,50 +21,51 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+  static final ValueNotifier<ThemeData> notifier = ValueNotifier(
+    ThemeData(
+      colorSchemeSeed: Color.fromARGB(255, 255, 0, 0),
+      splashFactory: InkRipple.splashFactory,
+      sliderTheme: const SliderThemeData(
+        showValueIndicator: ShowValueIndicator.always,
+      ),
+      brightness: WidgetsBinding.instance.platformDispatcher.platformBrightness,
+    ),
+  );
   @override
   Widget build(BuildContext context) {
-    return /*StreamBuilder<MaterialColor>(
-      initialData: Colors.pink,
-      stream: colorTheme.stream,
-      builder: ((context, snapshot) {
-        MaterialColor? data = snapshot.data;
-        if (snapshot.hasData) {
-          if (snapshot.data!.alpha != 255) {
-            data = generateMaterialColor(
-                color: snapshot.data!.withOpacity(1).withAlpha(255));
-          }
-        }
-        return */
-        MaterialApp(
-      title: 'Mudar Leds',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: /*data ??*/ Colors.pink,
-        splashFactory: InkRipple.splashFactory,
-        sliderTheme: const SliderThemeData(
-          showValueIndicator: ShowValueIndicator.always,
-        ),
-      ),
-      routes: {
-        '/': (context) => const MyHomePage(title: "Pagina inicial"),
-        '/esp32': (context) => const PaginaEsp32(),
-        '/zigbee': (context) => const PaginaZigbee()
-      },
-      onUnknownRoute: (RouteSettings settings) {
-        return MaterialPageRoute<void>(
-          settings: settings,
-          builder: (BuildContext context) => Scaffold(
-            body: UnselectableElevatedButton(
-                child: ElevatedButton(
-                    onPressed: () =>
-                        Navigator.popUntil(context, (route) => route.isFirst),
-                    child: const Text('Not Found'))),
-          ),
-        );
-      },
-    );
-    //}),
-    //);
+    return ValueListenableBuilder(
+        valueListenable: notifier,
+        builder: (context, themeData, widget) {
+          var themeMode = themeData.brightness == Brightness.light
+              ? ThemeMode.light
+              : ThemeMode.dark;
+          return widget ??
+              MaterialApp(
+                title: 'Mudar Leds',
+                debugShowCheckedModeBanner: false,
+                themeMode: themeMode,
+                theme: themeData.copyWith(brightness: Brightness.light),
+                darkTheme: themeData.copyWith(brightness: Brightness.dark),
+                routes: {
+                  '/': (context) => const MyHomePage(title: "Pagina inicial"),
+                  '/esp32': (context) => const PaginaEsp32(),
+                  '/zigbee': (context) => const PaginaZigbee(),
+                  '/settings': (context) => const SettingsPage()
+                },
+                onUnknownRoute: (RouteSettings settings) {
+                  return MaterialPageRoute<void>(
+                    settings: settings,
+                    builder: (BuildContext context) => Scaffold(
+                      body: UnselectableElevatedButton(
+                          child: ElevatedButton(
+                              onPressed: () => Navigator.popUntil(
+                                  context, (route) => route.isFirst),
+                              child: const Text('Not Found'))),
+                    ),
+                  );
+                },
+              );
+        });
   }
 }
 
@@ -236,6 +235,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Inicio"),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+                onPressed: () => Navigator.pushNamed(context, "/settings"),
+                icon: const Icon(Icons.settings)),
+          )
+        ],
       ),
       drawer: const NavDrawer(),
       body: Container(

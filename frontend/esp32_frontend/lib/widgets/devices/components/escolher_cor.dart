@@ -65,7 +65,7 @@ class _EscolherCorState extends State<EscolherCor> {
           );
         },
         style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(selectedColor)),
+            surfaceTintColor: MaterialStateProperty.all(selectedColor)),
         child: const Text("Cor selecionada"),
       ),
     );

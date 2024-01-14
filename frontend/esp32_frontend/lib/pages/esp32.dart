@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:esp32_frontend/main.dart';
 import 'package:esp32_frontend/widgets/other/my_button.dart';
 import 'package:esp32_frontend/widgets/other/navdrawer.dart';
 import 'package:flutter/foundation.dart';
@@ -8,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:material_color_generator/material_color_generator.dart';
 
 class PaginaEsp32 extends StatefulWidget {
   const PaginaEsp32({Key? key}) : super(key: key);
@@ -316,9 +314,11 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
             }),
           );
         },
-        //style: ButtonStyle(
-        //    backgroundColor: MaterialStateProperty.all(
-        //        selected == null ? selectedColor : selected!.cor)),
+        style: ButtonStyle(
+            surfaceTintColor: MaterialStateProperty.all(
+                (selected == null ? selectedColor : selected!.cor).alpha > 50
+                    ? (selected == null ? selectedColor : selected!.cor)
+                    : Theme.of(context).buttonTheme.colorScheme?.background)),
         child: const Text("Cor selecionada"),
       ),
     );
