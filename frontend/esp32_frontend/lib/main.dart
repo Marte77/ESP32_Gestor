@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:esp32_frontend/pages/esp32.dart';
 import 'package:esp32_frontend/pages/zigbee.dart';
 import 'package:esp32_frontend/util/support_web_mobile/mqtt_finder.dart';
+import 'package:esp32_frontend/widgets/devices/devices/abstract_device_main_card.dart';
 import 'package:esp32_frontend/widgets/devices/devices/esp32/esp32_main_card.dart';
 import 'package:esp32_frontend/widgets/devices/devices/hue_929001821618/hue_929001821618_main_card.dart';
 import 'package:esp32_frontend/widgets/devices/devices/tuya_ts0505b/tuya_ts0505b_main_card.dart';
@@ -14,7 +15,7 @@ import 'package:material_color_generator/material_color_generator.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:http/http.dart' as http;
 
-StreamController<MaterialColor> colorTheme = StreamController();
+//StreamController<MaterialColor> colorTheme = StreamController();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<MaterialColor>(
+    return /*StreamBuilder<MaterialColor>(
       initialData: Colors.pink,
       stream: colorTheme.stream,
       builder: ((context, snapshot) {
@@ -35,36 +36,37 @@ class MyApp extends StatelessWidget {
                 color: snapshot.data!.withOpacity(1).withAlpha(255));
           }
         }
-        return MaterialApp(
-          title: 'Mudar Leds',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            primarySwatch: data ?? Colors.pink,
-            splashFactory: InkRipple.splashFactory,
-            sliderTheme: const SliderThemeData(
-              showValueIndicator: ShowValueIndicator.always,
-            ),
+        return */
+        MaterialApp(
+      title: 'Mudar Leds',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: /*data ??*/ Colors.pink,
+        splashFactory: InkRipple.splashFactory,
+        sliderTheme: const SliderThemeData(
+          showValueIndicator: ShowValueIndicator.always,
+        ),
+      ),
+      routes: {
+        '/': (context) => const MyHomePage(title: "Pagina inicial"),
+        '/esp32': (context) => const PaginaEsp32(),
+        '/zigbee': (context) => const PaginaZigbee()
+      },
+      onUnknownRoute: (RouteSettings settings) {
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (BuildContext context) => Scaffold(
+            body: UnselectableElevatedButton(
+                child: ElevatedButton(
+                    onPressed: () =>
+                        Navigator.popUntil(context, (route) => route.isFirst),
+                    child: const Text('Not Found'))),
           ),
-          routes: {
-            '/': (context) => const MyHomePage(title: "Pagina inicial"),
-            '/esp32': (context) => const PaginaEsp32(),
-            '/zigbee': (context) => const PaginaZigbee()
-          },
-          onUnknownRoute: (RouteSettings settings) {
-            return MaterialPageRoute<void>(
-              settings: settings,
-              builder: (BuildContext context) => Scaffold(
-                body: UnselectableElevatedButton(
-                    child: ElevatedButton(
-                        onPressed: () => Navigator.popUntil(
-                            context, (route) => route.isFirst),
-                        child: const Text('Not Found'))),
-              ),
-            );
-          },
         );
-      }),
+      },
     );
+    //}),
+    //);
   }
 }
 
@@ -200,10 +202,16 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
     for (var zig in listaDevicesMqtt) {
-      if (zig["model"] == "TS0505B") {
+      String ieeeAddress = zig["ieee_address"];
+      var existe = cards.indexWhere((element) =>
+          element is AbstractDeviceMainCard &&
+          element.ieeeAddress == ieeeAddress);
+      if (existe != -1) continue;
+      if (zig["model"].contains("TS0505B")) {
         cards.add(TuyaTS0505bMainCard(
             mqttClient: mqttClient,
             friendlyName: zig["friendly_name"],
+            ieeeAddress: ieeeAddress,
             state: zig));
       }
       if (zig["model"] == "929001821618") {
@@ -211,6 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
         cards.add(Hue929001821618MainCard(
             mqttClient: mqttClient,
             friendlyName: zig["friendly_name"],
+            ieeeAddress: ieeeAddress,
             state: zig));
       }
     }

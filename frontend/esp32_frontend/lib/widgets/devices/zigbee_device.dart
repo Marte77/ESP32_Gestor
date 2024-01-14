@@ -67,7 +67,8 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
       description = "",
       model = "",
       vendor = "",
-      powerSource = "";
+      powerSource = "",
+      ieeeAdress = "";
   late MqttClient mqttClient;
   Map<String, dynamic> payloadData = {};
   Map<String, dynamic> dataReceivedOnSubscribe = {};
@@ -83,6 +84,7 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
       model = widget.device["model"];
       vendor = widget.device["vendor"];
       powerSource = widget.device["power_source"];
+      ieeeAdress = widget.device["ieee_address"];
       mqttClient = widget.mqttClient!;
     });
     String topic = 'zigbee2mqtt/$friendlyName';
@@ -110,23 +112,22 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
     Widget? lista;
     if (!canRender) return Container();
     //CADA DEVICE DEVE SUBSCREVER AO SEU RESPETIVO TOPICO.
-    if (model == "TS0505B") {
+    if (model.contains("TS0505B")) {
       //ligar e desligar
       lista = TuyaTS0505B(
           mqttClient: mqttClient,
           friendlyName: friendlyName,
-          state: dataReceivedOnSubscribe);
+          state: dataReceivedOnSubscribe,
+          ieeeAddress: ieeeAdress);
     }
     if (model == "929001821618") {
       //ligar e desligar
       lista = Hue929001821618(
           mqttClient: mqttClient,
           friendlyName: friendlyName,
-          state: dataReceivedOnSubscribe);
+          state: dataReceivedOnSubscribe,
+          ieeeAddress: ieeeAdress);
     }
-    addNumbers(int x, int y) => x + y;
-    final a = addNumbers(1, 1);
-
     if (lista != null) {
       return lista;
     } else {
@@ -142,7 +143,7 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
           widget.appBar.preferredSize.height,
       width: MediaQuery.of(context).size.width,
       child: Card(
-        color: Colors.green[50],
+        //color: Colors.green[50],
         child: SingleChildScrollView(
             controller: scrollController,
             child: Column(children: [

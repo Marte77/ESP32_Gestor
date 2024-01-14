@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 extension UpperCaseFirstLetter on String {
   String toUpperCaseOnlyFirstLetter() {
     if (isEmpty) return this;

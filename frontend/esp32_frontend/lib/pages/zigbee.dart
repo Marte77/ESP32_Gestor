@@ -61,16 +61,25 @@ class _PaginaZigbeeState extends State<PaginaZigbee> {
 
       for (var element in devices) {
         if (element["type"] as String != 'Coordinator') {
-          listaDevices.add({
-            "name": element["definition"],
-            "friendly_name": element["friendly_name"],
-            "exposes": element["definition"]["exposes"],
-            "model": element["definition"]["model"],
-            "vendor": element["definition"]["vendor"],
-            "description": element["definition"]["description"],
-            "power_source": element["power_source"],
-            "ieee_address": element["ieee_address"]
-          });
+          bool add = true;
+          for (var device in listaDevices) {
+            if (device["ieee_address"] == element["ieee_address"]) {
+              add = false;
+              break;
+            }
+          }
+          if (add) {
+            listaDevices.add({
+              "name": element["definition"],
+              "friendly_name": element["friendly_name"],
+              "exposes": element["definition"]["exposes"],
+              "model": element["definition"]["model"],
+              "vendor": element["definition"]["vendor"],
+              "description": element["definition"]["description"],
+              "power_source": element["power_source"],
+              "ieee_address": element["ieee_address"]
+            });
+          }
         }
       }
       setState(() {});

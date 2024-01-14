@@ -40,8 +40,8 @@ class Esp32 {
   }
 
   static double map(
-      double x, double in_min, double in_max, double out_min, double out_max) {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+      double x, double inMin, double inMax, double outMin, double outMax) {
+    return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
   }
 }
 
@@ -68,7 +68,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
   RGBMode? rgbMode = RGBMode.grbw;
   final formGlobalKey = GlobalKey<FormState>();
   String selectedMetodo = 'fadeEstatico';
-  Color? selectedColor = Colors.pink;
+  Color selectedColor = Colors.pink;
   int brightnessVal = 254;
   int waitTime = 50;
   bool isWaitButtonEnabled = true;
@@ -120,7 +120,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
         if (selected!.cor.blue != 0 &&
             selected!.cor.green != 0 &&
             selected!.cor.red != 0) {
-          colorTheme.add(generateMaterialColor(color: selected!.cor));
+          //colorTheme.add(generateMaterialColor(color: selected!.cor));
         }
       }
       setState(() {});
@@ -240,7 +240,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
           onChanged: (rgb) {
             if (rgb != null) {
               setState(() {
-                rgbMode = rgb as RGBMode;
+                rgbMode = rgb;
               });
             }
           },
@@ -250,7 +250,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
         ),
         UnselectableElevatedButton(
             child: ElevatedButton(
-          child: Text("Enviar novo Modo"),
+          child: const Text("Enviar novo Modo"),
           onPressed: () {
             var url = Uri.http(
                 selected!.ipaddress, "changeLED/${rgbMode.toString()}");
@@ -283,7 +283,7 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
           showDialog(
             context: context,
             builder: ((context) {
-              var cor = selected == null ? selectedColor! : selected!.cor;
+              var cor = selected == null ? selectedColor : selected!.cor;
               if (cor.blue == 0 && cor.red == 0 && cor.green == 0) {
                 cor = Colors.pinkAccent;
               }
@@ -297,9 +297,9 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
                       setState(() {
                         selectedColor = value;
                         selected?.cor = value;
-                        colorTheme.add(
+                        /*colorTheme.add(
                           generateMaterialColor(color: value),
-                        );
+                        );*/
                       });
                     }),
                     portraitOnly: true,
@@ -316,9 +316,9 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
             }),
           );
         },
-        style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(
-                selected == null ? selectedColor : selected!.cor)),
+        //style: ButtonStyle(
+        //    backgroundColor: MaterialStateProperty.all(
+        //        selected == null ? selectedColor : selected!.cor)),
         child: const Text("Cor selecionada"),
       ),
     );
@@ -334,7 +334,6 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
           return;
         }
         if (selected == null ||
-            selectedColor == null ||
             selected!.ipaddress.isEmpty ||
             selectedMetodo.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -342,14 +341,14 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
           return;
         }
         if (isFullWhite) {
-          selectedColor = selectedColor!
+          selectedColor = selectedColor
               .withRed(0)
               .withBlue(0)
               .withGreen(0)
               .withAlpha(0); //alpha a 0 porque inverte
         }
         var url = Uri.http(selected!.ipaddress,
-            "mode/$selectedMetodo?r=${selectedColor!.red},g=${selectedColor!.green},b=${selectedColor!.blue},w=${Esp32.map(selectedColor!.alpha.toDouble(), 0, 255, 255, 0)},br=$brightnessVal");
+            "mode/$selectedMetodo?r=${selectedColor.red},g=${selectedColor.green},b=${selectedColor.blue},w=${Esp32.map(selectedColor.alpha.toDouble(), 0, 255, 255, 0)},br=$brightnessVal");
         http.get(url).then((value) => null).onError((error, stackTrace) {
           return null;
         });
