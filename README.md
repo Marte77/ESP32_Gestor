@@ -6,6 +6,12 @@
 # backend folder
 - contains an express.js project that stores the status of all the ESP32 that are connected to them, in order to show in the frontend page
 - uses node.js, express.js and a sqlite database
+## setup/pre-req
+zigbee2mqtt
+rabbitmq or mosquitto (i use mosquitto, currently, previously used rabbitmq with no difference)
+zigbee adaptor like SONOFF ZBDongle-E
+
+
 
 # frontend folder
 - shows the state of the current ESP32 devices (haven't tested more than one, since I only have one, so I don't know if it works)
