@@ -10,6 +10,11 @@
 zigbee2mqtt
 rabbitmq or mosquitto (i use mosquitto, currently, previously used rabbitmq with no difference)
 zigbee adaptor like SONOFF ZBDongle-E
+### passos
+1. seguir o [guia de instalação](https://www.zigbee2mqtt.io/guide/installation/01_linux.html)
+2. colocar o zigbee2mqtt como serviço que começa automaticamente em boot
+3. colocar o serviço de backend ativo
+4. instalar a app no telemóvel e selecionar o ip
 
 
 
