@@ -44,6 +44,9 @@ class _PaginaZigbeeState extends State<PaginaZigbee> {
       });
     }).then((value) {
       if (mqttClient.connectionStatus?.state == MqttConnectionState.connected) {
+        if (kDebugMode) {
+          print("ZIGBEE::MQTT Connected");
+        }
         mqttClient.subscribe(zigbee2mqttTopic, MqttQos.atLeastOnce);
         mqttClient.updates!.listen((event) => parseDevices(event));
       }
@@ -117,7 +120,6 @@ class _PaginaZigbeeState extends State<PaginaZigbee> {
                           itemBuilder: (context, index) {
                             return ZigBeeDevice(
                               appBar: myAppBar,
-                              mqttClient: mqttClient,
                               device: listaDevices.elementAt(index),
                             );
                           }),

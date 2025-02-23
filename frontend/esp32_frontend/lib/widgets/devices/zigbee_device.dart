@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
+import '../../globals.dart';
 import 'devices/tuya_ts0505b/tuya_ts0505b.dart';
 
 class ZigBeeDevice extends StatefulWidget {
@@ -15,10 +16,9 @@ class ZigBeeDevice extends StatefulWidget {
       {Key? key,
       required this.appBar,
       required this.device,
-      required this.mqttClient})
+      })
       : super(key: key);
   final AppBar appBar;
-  final MqttClient? mqttClient;
   final Map<String, dynamic> device;
   static const String nullComponent = "NULO!_";
 
@@ -69,7 +69,6 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
       vendor = "",
       powerSource = "",
       ieeeAdress = "";
-  late MqttClient mqttClient;
   Map<String, dynamic> payloadData = {};
   Map<String, dynamic> dataReceivedOnSubscribe = {};
   bool canRender = false;
@@ -85,15 +84,14 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
       vendor = widget.device["vendor"];
       powerSource = widget.device["power_source"];
       ieeeAdress = widget.device["ieee_address"];
-      mqttClient = widget.mqttClient!;
     });
     String topic = 'zigbee2mqtt/$friendlyName';
     var builder = MqttClientPayloadBuilder();
     builder.addString(jsonEncode({"state": ""}));
-    mqttClient.subscribe(topic, MqttQos.atLeastOnce);
-    mqttClient.publishMessage(
+    mqttClient!.subscribe(topic, MqttQos.atLeastOnce);
+    mqttClient!.publishMessage(
         '$topic/get', MqttQos.atMostOnce, builder.payload!);
-    mqttClient.updates!.listen((event) {
+    mqttClient!.updates!.listen((event) {
       for (var evento in event) {
         if (evento.topic != topic) continue;
         var mensagem = (evento).payload as MqttPublishMessage;
@@ -103,7 +101,7 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
           canRender = true;
           dataReceivedOnSubscribe = jsonDecode(conteudo);
         });
-        mqttClient.unsubscribe(topic);
+        mqttClient!.unsubscribe(topic);
       }
     });
   }
@@ -115,7 +113,6 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
     if (model.contains("TS0505B")) {
       //ligar e desligar
       lista = TuyaTS0505B(
-          mqttClient: mqttClient,
           friendlyName: friendlyName,
           state: dataReceivedOnSubscribe,
           ieeeAddress: ieeeAdress);
@@ -123,7 +120,6 @@ class _ZigBeeDeviceState extends State<ZigBeeDevice> {
     if (model == "929001821618") {
       //ligar e desligar
       lista = Hue929001821618(
-          mqttClient: mqttClient,
           friendlyName: friendlyName,
           state: dataReceivedOnSubscribe,
           ieeeAddress: ieeeAdress);

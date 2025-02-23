@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class TuyaTS0505B extends AbstractDevice {
   const TuyaTS0505B(
       {super.key,
-      required super.mqttClient,
       required super.state,
       required super.friendlyName,
       required super.ieeeAddress});

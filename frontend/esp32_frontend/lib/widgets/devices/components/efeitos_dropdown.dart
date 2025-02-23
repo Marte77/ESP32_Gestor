@@ -11,12 +11,12 @@ class EfeitosDropdown extends StatefulWidget {
 }
 
 class _EfeitosDropdownState extends State<EfeitosDropdown> {
-  List<Text> list = [];
+  List<Text> list = [const Text("---")];
   String effectChosen = "";
   List<DropdownMenuItem<String>> dropDownList = [];
   @override
   void initState() {
-    list = widget.list;
+    list = widget.list.isNotEmpty ? widget.list : list;
     for (var text in widget.list) {
       if (text.data == null) {
         throw const BuildException(
@@ -28,7 +28,7 @@ class _EfeitosDropdownState extends State<EfeitosDropdown> {
       ));
     }
 
-    effectChosen = widget.list.first.data!;
+    effectChosen = list.first.data!;
     super.initState();
   }
 

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 class TuyaTS0505bMainCard extends AbstractDeviceMainCard {
   const TuyaTS0505bMainCard(
       {super.key,
-      required super.mqttClient,
       required super.friendlyName,
       required super.state,
       required super.ieeeAddress});

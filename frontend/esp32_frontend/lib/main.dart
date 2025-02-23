@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:esp32_frontend/pages/esp32.dart';
 import 'package:esp32_frontend/pages/settings.dart';
 import 'package:esp32_frontend/pages/zigbee.dart';
+import 'package:esp32_frontend/util/string_extension.dart';
 import 'package:esp32_frontend/util/support_web_mobile/mqtt_finder.dart';
 import 'package:esp32_frontend/widgets/devices/devices/abstract_device_main_card.dart';
 import 'package:esp32_frontend/widgets/devices/devices/esp32/esp32_main_card.dart';
@@ -13,9 +14,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'globals.dart' as globals;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  var sp = await SharedPreferences.getInstance();
+  if (!sp.containsKey("server")) {
+    sp.setString(SHARED_PREFS_SERVER_KEY, "192.168.0.103");
+    sp.setString(SHARED_PREFS_SERVER_PORT_KEY, "8081");
+  }
+  globals.mqttClient = MqttFinder().getClient();
   runApp(const MyApp());
 }
 
@@ -23,8 +32,8 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   static final ValueNotifier<ThemeData> notifier = ValueNotifier(
     ThemeData(
-      colorSchemeSeed: Color.fromARGB(255, 255, 0, 0),
-      splashFactory: InkRipple.splashFactory,
+      colorSchemeSeed: const Color.fromARGB(255, 255, 0, 0),
+      splashFactory: InkSparkle.splashFactory,//InkRipple.splashFactory,
       sliderTheme: const SliderThemeData(
         showValueIndicator: ShowValueIndicator.always,
       ),
@@ -78,7 +87,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final mqttClient = MqttFinder().getClient();
   List<Map<String, dynamic>> listaDevicesMqtt = [];
   static const zigbee2mqttTopic = 'zigbee2mqtt/bridge/devices';
   List<Widget> cards = [];
@@ -93,6 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
         .withWillMessage('My Will message')
         .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
+    var mqttClient = globals.mqttClient!;
     mqttClient.connectionMessage = connMess;
     mqttClient.autoReconnect = true;
     mqttClient.connect().catchError((e) {
@@ -104,6 +113,9 @@ class _MyHomePageState extends State<MyHomePage> {
       return e;
     }).then((value) {
       if (mqttClient.connectionStatus?.state == MqttConnectionState.connected) {
+        if (kDebugMode) {
+          print("MAIN::MQTT Connected");
+        }
         mqttClient.subscribe(zigbee2mqttTopic, MqttQos.atLeastOnce);
         mqttClient.updates!.listen((event) => parseDevices(event));
       }
@@ -112,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void initAsync() async {
-    var url = Uri.http('192.168.3.0:8080', 'getall');
+    var url = Uri.http('192.168.0.103:8081', 'getall');
     var res = await http.get(url);
     if (res.statusCode == 200) {
       List<dynamic> parsed = jsonDecode(res.body)['dados'];
@@ -177,6 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void createCardsZig() {
+    var mqttClient = globals.mqttClient!;
     if (mqttClient.connectionStatus == null ||
         (mqttClient.connectionStatus!.state ==
                 MqttConnectionState.disconnected ||
@@ -208,7 +221,6 @@ class _MyHomePageState extends State<MyHomePage> {
       if (existe != -1) continue;
       if (zig["model"].contains("TS0505B")) {
         cards.add(TuyaTS0505bMainCard(
-            mqttClient: mqttClient,
             friendlyName: zig["friendly_name"],
             ieeeAddress: ieeeAddress,
             state: zig));
@@ -216,7 +228,6 @@ class _MyHomePageState extends State<MyHomePage> {
       if (zig["model"] == "929001821618") {
         //ligar e desligar
         cards.add(Hue929001821618MainCard(
-            mqttClient: mqttClient,
             friendlyName: zig["friendly_name"],
             ieeeAddress: ieeeAddress,
             state: zig));
@@ -226,7 +237,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    mqttClient.disconnect();
     super.dispose();
   }
 

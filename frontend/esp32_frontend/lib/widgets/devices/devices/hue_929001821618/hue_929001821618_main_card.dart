@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 class Hue929001821618MainCard extends AbstractDeviceMainCard {
   const Hue929001821618MainCard(
       {super.key,
-      required super.mqttClient,
       required super.friendlyName,
       required super.state,
       required super.ieeeAddress});

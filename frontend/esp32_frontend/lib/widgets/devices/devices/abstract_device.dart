@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 
+import '../../../globals.dart';
 import '../../../util/mqtt_subscriber_interface.dart';
 import '../components/color_temp_with_preset.dart';
 import '../components/efeitos_dropdown.dart';
@@ -11,11 +12,11 @@ import '../components/ligar_desligar.dart';
 import '../components/luminosidade.dart';
 import '../components/power_on_behaviour.dart';
 import '../zigbee_device.dart';
+import "package:esp32_frontend/globals.dart" as globals;
 
 abstract class AbstractDevice extends StatefulWidget {
   const AbstractDevice(
       {Key? key,
-      required this.mqttClient,
       required this.ieeeAddress,
       required this.state,
       required this.friendlyName})
@@ -23,7 +24,6 @@ abstract class AbstractDevice extends StatefulWidget {
   final String friendlyName;
   final String ieeeAddress;
   final Map<String, dynamic> state;
-  final MqttClient? mqttClient;
 }
 
 enum DeviceProperties {
@@ -45,7 +45,6 @@ enum DeviceProperties {
 
 abstract class AbstractDeviceState<T extends AbstractDevice> extends State<T>
     implements MQTTSubscriberInterface {
-  late MqttClient mqttClient;
   abstract List<DeviceProperties> deviceProperties;
   set _deviceProperties(List<DeviceProperties> list) {
     deviceProperties = list;
@@ -96,6 +95,19 @@ abstract class AbstractDeviceState<T extends AbstractDevice> extends State<T>
           : 0;
     }
 
+    if (deviceProperties.contains(DeviceProperties.effects)) {
+      if (payloadData["effect"] != null) {
+        var list = payloadData["effect"] as List<String>;
+        var listtext = <Text>[];
+        for (var str in list) {
+          listtext.add(Text(str));
+        }
+        effects = listtext;
+      } else {
+        effects = [];
+      }
+    }
+
     if (deviceProperties.contains(DeviceProperties.color)) {
       selectedColor = payloadData["color"] != null
           ? ZigBeeDevice.convert_xyY_to_XYZ(
@@ -120,7 +132,7 @@ abstract class AbstractDeviceState<T extends AbstractDevice> extends State<T>
   @override
   void initState() {
     super.initState();
-    mqttClient = widget.mqttClient!;
+    var mqttClient = globals.mqttClient!;
     setState(() {
       topic = 'zigbee2mqtt/${widget.friendlyName}';
       payloadData = widget.state;
@@ -152,7 +164,7 @@ abstract class AbstractDeviceState<T extends AbstractDevice> extends State<T>
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<MqttReceivedMessage<MqttMessage>>>(
-      stream: mqttClient.updates!,
+      stream: mqttClient!.updates!,
       builder: (context, snapshot) {
         //nao preciso de fazer nada pois no initState já tenho a funcao a fazer listen
         return Column(children: elementos(context));
@@ -164,7 +176,7 @@ abstract class AbstractDeviceState<T extends AbstractDevice> extends State<T>
 
   @override
   void subscribeToTopic() {
-    mqttClient.subscribe(topic, MqttQos.atLeastOnce);
+    mqttClient!.subscribe(topic, MqttQos.atLeastOnce);
   }
 
   @override
@@ -172,13 +184,13 @@ abstract class AbstractDeviceState<T extends AbstractDevice> extends State<T>
     subscribeToTopic();
     var builder = MqttClientPayloadBuilder();
     builder.addString(jsonEncode(map));
-    mqttClient.publishMessage(
+    mqttClient!.publishMessage(
         '$topic/set', MqttQos.atMostOnce, builder.payload!);
   }
 
   @override
   void unsubscribeToTopic() {
-    mqttClient.unsubscribe(topic);
+    mqttClient!.unsubscribe(topic);
   }
 
   /* ------------- METODOS DE WIDGETS ------------- */

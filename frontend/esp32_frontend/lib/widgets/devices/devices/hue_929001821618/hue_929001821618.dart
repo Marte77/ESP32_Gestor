@@ -5,7 +5,6 @@ import '../abstract_device.dart';
 class Hue929001821618 extends AbstractDevice {
   const Hue929001821618(
       {super.key,
-      required super.mqttClient,
       required super.state,
       required super.friendlyName,
       required super.ieeeAddress});

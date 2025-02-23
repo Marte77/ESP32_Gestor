@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../util/string_extension.dart';
 
 class PaginaEsp32 extends StatefulWidget {
   const PaginaEsp32({Key? key}) : super(key: key);
@@ -83,7 +86,10 @@ class _PaginaEsp32State extends State<PaginaEsp32> {
   }
 
   void initAsync() async {
-    var url = Uri.http('192.168.3.0:8080', 'getall');
+    var sp = await SharedPreferences.getInstance();
+    var ip = sp.getString(SHARED_PREFS_SERVER_KEY)!;
+    var port = sp.getString(SHARED_PREFS_SERVER_PORT_KEY)!;
+    var url = Uri.http('$ip:$port', 'getall');
     var res = await http.get(url);
     if (res.statusCode == 200) {
       List<dynamic> parsed = jsonDecode(res.body)['dados'];

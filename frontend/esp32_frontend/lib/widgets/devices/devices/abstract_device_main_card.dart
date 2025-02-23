@@ -8,16 +8,15 @@ import 'package:esp32_frontend/widgets/devices/devices/abstract_device.dart';
 import 'package:esp32_frontend/widgets/devices/zigbee_device.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
+import "package:esp32_frontend/globals.dart" as globals;
 
 abstract class AbstractDeviceMainCard extends StatefulWidget {
   const AbstractDeviceMainCard(
       {Key? key,
-      required this.mqttClient,
       required this.friendlyName,
       required this.state,
       required this.ieeeAddress})
       : super(key: key);
-  final MqttClient mqttClient;
   final String friendlyName;
   final String ieeeAddress;
   final Map<String, dynamic> state;
@@ -37,7 +36,8 @@ abstract class AbstractDeviceMainCardState<T extends AbstractDeviceMainCard>
     topic = 'zigbee2mqtt/${widget.friendlyName}';
     payloadData = widget.state;
     subscribeToTopic();
-    widget.mqttClient.updates!.listen((event) {
+    var mqttClient = globals.mqttClient!;
+    mqttClient.updates!.listen((event) {
       for (var evento in event) {
         if (evento.topic == topic) {
           payloadData = jsonDecode(MqttPublishPayload.bytesToStringAsString(
@@ -51,7 +51,7 @@ abstract class AbstractDeviceMainCardState<T extends AbstractDeviceMainCard>
     });
     var builder = MqttClientPayloadBuilder();
     builder.addString('{"state": ""}');
-    widget.mqttClient
+    mqttClient
         .publishMessage("$topic/get", MqttQos.atLeastOnce, builder.payload!);
   }
 
@@ -142,7 +142,7 @@ abstract class AbstractDeviceMainCardState<T extends AbstractDeviceMainCard>
 
   @override
   void subscribeToTopic() {
-    widget.mqttClient.subscribe(topic, MqttQos.atLeastOnce);
+    globals.mqttClient?.subscribe(topic, MqttQos.atLeastOnce);
   }
 
   @override
@@ -150,13 +150,13 @@ abstract class AbstractDeviceMainCardState<T extends AbstractDeviceMainCard>
     subscribeToTopic();
     var builder = MqttClientPayloadBuilder();
     builder.addString(jsonEncode(map));
-    widget.mqttClient
-        .publishMessage('$topic/set', MqttQos.atMostOnce, builder.payload!);
+    globals.mqttClient
+        ?.publishMessage('$topic/set', MqttQos.atMostOnce, builder.payload!);
     setState(() {});
   }
 
   @override
   void unsubscribeToTopic() {
-    widget.mqttClient.unsubscribe(topic);
+    globals.mqttClient?.unsubscribe(topic);
   }
 }
