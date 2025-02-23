@@ -5,7 +5,7 @@
 #define PIN 23
 #define PIN_VCC 12
 #define PIN_GND 21
-#define NUMBER_OF_LEDS 144  //40
+#define NUMBER_OF_LEDS 60
 #define MAX_BRIGHTNESS 255
 #define MEU_ROSA createCor(252, 2, 149)
 #define BRANCO createCor(0, 0, 0, 255)
@@ -77,6 +77,7 @@ String linkRegistarServidor = "http://192.168.0.103:8081";
 
 //TaskHandle_t TaskWifi;
 TaskHandle_t TaskLED;
+//SemaphoreHandle_t xSemaphore;
 
 inline void setupWifi() {
   WiFi.disconnect(true);
@@ -142,8 +143,11 @@ String modoToString() {
 }
 void setup() {
   Serial.begin(115200);
-  pinMode(PIN_VCC, OUTPUT);
-  digitalWrite(PIN_VCC, HIGH);
+  //xSemaphore = xSemaphoreCreateMutex();
+  //pinMode(PIN_VCC, OUTPUT);
+  //digitalWrite(PIN_VCC, HIGH);
+  //pinMode(2, OUTPUT);
+  //digitalWrite(2, LOW);
   strip.begin();
   strip.setBrightness(255);
   // Initialize all pixels to 'off'
@@ -172,7 +176,7 @@ inline void createLEDThread() {
     "led controller",  //nome da task
     8000,              //tamanho do stack para a task
     NULL,              //argumentos da task
-    1,                 //prioridade da task
+    20,                 //prioridade da task
     &TaskLED,
     1  //meter a task no core 1
   );
@@ -180,6 +184,8 @@ inline void createLEDThread() {
 long int currentTime = millis();
 int brightness = 255;
 void loop() {
+  pinMode(2, OUTPUT);
+  digitalWrite(2, LOW);
   WiFiClient client = server.available();
   if (client) {
     parseRequest(client);
@@ -192,7 +198,9 @@ void loop() {
 
 void loopLED(void* pvParameters) {
   for (;;) {
+    //while (xSemaphoreTake(xSemaphore, 100) == pdFALSE){} // wait for mutex to be available
     selectMode();
+    //xSemaphoreGive(xSemaphore);
   }
 }
 
@@ -200,6 +208,7 @@ inline void parseRequest(WiFiClient client) {
   String currentLine = "";
   bool currentLineIsBlank = true;
   String response = "";
+  //while (xSemaphoreTake(xSemaphore, 50) == pdFALSE){} // wait for mutex to be available
   while (client.connected()) {
     if (client.available()) {
       char c = client.read();
@@ -270,12 +279,12 @@ inline void parseRequest(WiFiClient client) {
       }
     }
   }
-
+  //xSemaphoreGive(xSemaphore);
   client.println(response);
   delay(10);  // give the web browser time to receive the data
   client.stop();
-  vTaskDelete(TaskLED);
-  createLEDThread();
+  //vTaskDelete(TaskLED);
+  //createLEDThread();
   Serial.println("client disconnected");
 }
 inline void selectMode() {
